@@ -78,8 +78,8 @@ export default function CadastroAdministradores() {
       if (opcao === 'ALTERAÇÃO DE ADMINISTRADOR' || opcao === 'INCLUSÃO DE ADMINISTRADOR') {
         let url = `/api/auth/check-user?usuario=${usuario}`;
         
-      // Se for uma alteração, passamos também o idAdministrador para ignorar ele mesmo na alteração de outro campo
-      if (opcao === 'ALTERAÇÃO DE ADMINISTRADOR') {
+        // Se for uma alteração, passamos também o idAdministrador para ignorar ele mesmo na alteração de outro campo
+        if (opcao === 'ALTERAÇÃO DE ADMINISTRADOR') {
           url += `&idAdministrador=${selectedId}`;
         }
       
