@@ -40,6 +40,13 @@ export default function CadastroParticipantes() {
     fetchParticipantes();
   }, []);
 
+  const handleFocus = () => {
+    setFone(fone.replace(/\D/g, ''));
+  };
+  const handleBlur = () => {
+    setFone(formatPhoneNumber(fone));
+  };
+
   const handleIncluir = () => {
     setOpcao('INCLUSÃO DE PARTICIPANTE');
     setIsEditing(true);
@@ -336,20 +343,22 @@ export default function CadastroParticipantes() {
           <div className="flex flex-col space-y-1">
             <div className="flex items-center">
               <label className="mr-2 text-sm">Nome:</label>
-              <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 flex-1" />
+              <input type="text" maxlength="60" value={nome} onChange={(e) => setNome(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 flex-1" />
             </div>
             <div className="flex items-center">
-              <label className="mr-2 text-sm">Fone:</label>
-              <input  type="text" 
+              <label className="mr-2 text-sm">Celular:</label>
+              <input  type="text" maxlength="11" 
                       value={fone} 
                       onChange={(e) => setFone(e.target.value)} 
+                      onFocus={handleFocus}
+                      onBlur={handleBlur}
                       placeholder="Digite apenas número no formato DDDNÚMERO com 11 dígitos"
                       disabled={isImpDisabled} 
                       className="border p-0 h-6 flex-1" />
             </div>
             <div className="flex items-center">
               <label className="mr-2 text-sm">E-mail:</label>
-              <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 flex-1" />
+              <input type="text" maxlength="100" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 flex-1" />
             </div>
             <div className="flex items-center">
               <label className="mr-2 text-sm">Mensagem:</label>

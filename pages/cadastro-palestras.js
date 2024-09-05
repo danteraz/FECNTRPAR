@@ -321,19 +321,19 @@ export default function CadastroPalestras() {
             </div>
             <div className="flex items-center">
               <label className="mr-2 text-sm">Título:</label>
-              <input type="text" value={titulo} onChange={(e) => setTitulo(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 rounded flex-1" />
+              <input type="text" maxlength="100" value={titulo} onChange={(e) => setTitulo(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 rounded flex-1" />
             </div>
             <div className="flex items-center">
               <label className="mr-2 text-sm">Assunto:</label>
-              <input type="text" value={assunto} onChange={(e) => setAssunto(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 rounded flex-1" />
+              <input type="text" maxlength="100" value={assunto} onChange={(e) => setAssunto(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 rounded flex-1" />
             </div>
             <div className="flex items-center">
               <label className="mr-2 text-sm">Organizador:</label>
-              <input type="text" value={organizador} onChange={(e) => setOrganizador(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 rounded flex-1" />
+              <input type="text" maxlength="100" value={organizador} onChange={(e) => setOrganizador(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 rounded flex-1" />
             </div>
             <div className="flex items-center">
               <label className="mr-2 text-sm">Local:</label>
-              <input type="text" value={localpalestra} onChange={(e) => setLocalPalestra(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 rounded flex-1" />
+              <input type="text" maxlength="100" value={localpalestra} onChange={(e) => setLocalPalestra(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 rounded flex-1" />
             </div>
           </div>
 
