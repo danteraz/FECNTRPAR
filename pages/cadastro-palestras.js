@@ -34,6 +34,9 @@ export default function CadastroPalestras() {
 
   useEffect(() => {
     async function fetchPalestras() {
+
+      console.log("ENTROU NA TELA PALESTRA")
+
       const res = await fetch('/api/palestras');
       const data = await res.json();
       setPalestras(data);
@@ -225,14 +228,15 @@ export default function CadastroPalestras() {
         style={{ gridTemplateRows: '0fr 3.5fr', gridTemplateColumns: '0.5fr 2.0fr' }}
       >
         {/* Área da Imagem (C11) */}
-        {/*<div className="flex flex-col items-center justify-center border p-2">*/}
         <div className="flex flex-col items-center justify-center">
           <Image src="/CIPA.PNG" alt="CIPA" width={100} height={100} />
         </div>
+
         {/* Área do Cabeçalho (C12) */}
         <div className="flex items-center justify-center">
           <h1 className="text-2xl font-bold">CONTROLE DE PALESTRAS</h1>
         </div>
+
         {/* Área de Dados (Esquerda) - Menu */}
         <div className="flex flex-col justify-center border border-black rounded-lg p-2 space-y-4">
           <button
