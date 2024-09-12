@@ -2,9 +2,25 @@
 
 import { query } from '../../../../becntrpar/config/db';
 export default async function handler(req, res) {
+
   const { id } = req.query;
 
-  if (req.method === 'PUT') {
+  if (req.method === 'GET') {
+    const sql = 'SELECT * FROM palestras WHERE idPalestra = ?';
+    const values = [id];
+  
+    try {
+      const [rows] = await query(sql, values);
+      
+      if (rows && rows.idPalestra) {
+        res.status(200).json(rows);
+      } else {
+        res.status(404).json({ error: 'Palestra não encontrada' });
+      }
+    } catch (error) {
+      res.status(500).json({ error: 'Erro ao buscar palestra ID.JS' });
+    } 
+  } else if (req.method === 'PUT') {
     const { titulo, datapalestra, hora, localpalestra, organizador, assunto } = req.body;
     
     // Validação dos campos

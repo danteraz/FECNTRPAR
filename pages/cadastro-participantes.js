@@ -40,6 +40,13 @@ export default function CadastroParticipantes() {
     fetchParticipantes();
   }, []);
 
+  const handleFocus = () => {
+    setFone(fone.replace(/\D/g, ''));
+  };
+  const handleBlur = () => {
+    setFone(formatPhoneNumber(fone));
+  };
+
   const handleIncluir = () => {
     setOpcao('INCLUSÃO DE PARTICIPANTE');
     setIsEditing(true);
@@ -72,11 +79,14 @@ export default function CadastroParticipantes() {
 
   const handleConfirmar = async () => {
 
+    // Limpa o valor do telefone para garantir que apenas os números sejam enviados
+    const foneLimpo = fone.replace(/\D/g, '');
+
     //  Verifica se Já existe um participante com o fone
     try {
       
       if (opcao === 'ALTERAÇÃO DE PARTICIPANTE' || opcao === 'INCLUSÃO DE PARTICIPANTE') {
-        let url = `/api/auth/check-fone-participante?fone=${fone}`;
+        let url = `/api/auth/check-fone-participante?fone=${foneLimpo}`;
         
         // Se for uma alteração, passamos também o idParticipante para ignorar ele mesmo na alteração de outro campo
         if (opcao === 'ALTERAÇÃO DE PARTICIPANTE') {
@@ -103,10 +113,6 @@ export default function CadastroParticipantes() {
 
     const mensagemValor = parseInt(mensagem) || null;
 
-    // Limpa o valor do telefone para garantir que apenas os números sejam enviados
-    const foneLimpo = fone.replace(/\D/g, '');
-
-    // Inclusão body: JSON.stringify({ idParticipante: maiorId, nome, fone, email, usuario, mensagem: mensagemValor }),
     if (opcao.includes('INCLUSÃO DE PARTICIPANTE')) {
 
       const response = await fetch('/api/participantes', {
@@ -114,7 +120,7 @@ export default function CadastroParticipantes() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ nome, fone, email, usuario, mensagem: mensagemValor }),
+        body: JSON.stringify({ nome, fone, email, mensagem: mensagemValor }),
       });
       const result = await response.json();
 
@@ -135,7 +141,7 @@ export default function CadastroParticipantes() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ nome, fone: foneLimpo, email, usuario, mensagem: mensagemValor }),
+        body: JSON.stringify({ nome, fone: foneLimpo, email, mensagem: mensagemValor }),
       });
       const result = await response.json();
 
@@ -187,7 +193,6 @@ export default function CadastroParticipantes() {
       setNome(admin.nome);
       setFone(formatPhoneNumber(admin.Fone));
       setEmail(admin.email);
-      setUsuario(admin.usuario);
 
       // Inicializa o campo "mensagem" com o valor correspondente
       const mensagemTexto = admin.mensagem === 1 ? '1' :
@@ -202,7 +207,6 @@ export default function CadastroParticipantes() {
     setNome('');
     setFone('');
     setEmail('');
-    setUsuario('');
     setMensagem('          ');
     //setSenha('');
   };
@@ -261,11 +265,11 @@ export default function CadastroParticipantes() {
         <div className="flex flex-col justify-center border border-black rounded-lg p-2 space-y-4">
           <button
             type="button"
-            onClick={() => handleNavigation('/cadastro-participantes')}
+            onClick={() => handleNavigation('/cadastro-administradores')}
             className={`bg-gray-200 text-gray-800 py-1 px-4 rounded hover:bg-gray-300 ${isNavDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
             disabled={isNavDisabled}
           >
-            Cadastro de Participantes
+            Cadastro de Administradores
           </button>
           <button
             type="button"
@@ -325,7 +329,7 @@ export default function CadastroParticipantes() {
         </div>
 
         {/* Área de Dados (C22) - Cadastro de Participantes */}
-        <div className="relative flex flex-col border border-black rounded-lg p-2 space-y-4">
+        <div className="relative flex flex-col border border-black rounded-lg p-2 space-y-2">
           {/* Título da Seção */}
           <h2 className="text-xl font-bold text-center">CADASTRO DE PARTICIPANTEES</h2>
           <hr className="border-t-2 border-black w-full mb-4" />
@@ -339,21 +343,26 @@ export default function CadastroParticipantes() {
           <div className="flex flex-col space-y-1">
             <div className="flex items-center">
               <label className="mr-2 text-sm">Nome:</label>
-              <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 flex-1" />
+              <input type="text" maxlength="60" value={nome} onChange={(e) => setNome(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 p-0 h-6 flex-1" />
             </div>
             <div className="flex items-center">
-              <label className="mr-2 text-sm">Fone:</label>
-              <input type="text" value={fone} onChange={(e) => setFone(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 flex-1" />
+              <label className="mr-2 text-sm">Celular:</label>
+              <input  type="text" maxlength="11" 
+                      value={fone} 
+                      onChange={(e) => setFone(e.target.value)} 
+                      onFocus={handleFocus}
+                      onBlur={handleBlur}
+                      placeholder="Digite apenas número no formato DDDNÚMERO com 11 dígitos"
+                      disabled={isImpDisabled} 
+                      className="border border-gray-800 p-0 h-6 flex-1" />
             </div>
             <div className="flex items-center">
               <label className="mr-2 text-sm">E-mail:</label>
-              <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 flex-1" />
+              <input type="text" maxlength="100" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 p-0 h-6 flex-1" />
             </div>
             <div className="flex items-center">
-              <label className="mr-2 text-sm">Usuário:</label>
-              <input type="text" value={usuario} onChange={(e) => setUsuario(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 w-32" />
-              <label className="ml-4 mr-2 text-sm">Mensagem:</label>
-              <select value={mensagem} onChange={(e) => setMensagem(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 w-32">
+              <label className="mr-2 text-sm">Mensagem:</label>
+              <select value={mensagem} onChange={(e) => setMensagem(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 p-0 h-6 w-32">
                 <option value="          ">          </option>
                 <option value="1">Fone</option>
                 <option value="2">E-mail</option>
@@ -367,7 +376,7 @@ export default function CadastroParticipantes() {
               <tr>
                   <th className="w-1/12 border border-gray-500 px-2 py-0 p-0 whitespace-nowrap text-left">Cod.</th>
                   <th className="w-7/12 border border-gray-500 px-2 py-0 p-0 whitespace-nowrap text-left">Nome</th>
-                  <th className="w-4/12 border border-gray-500 px-2 py-0 p-0 whitespace-nowrap text-left">Usuário</th>
+                  <th className="w-4/12 border border-gray-500 px-2 py-0 p-0 whitespace-nowrap text-left">Telefone</th>
               </tr>
             </thead>
             <tbody>
@@ -375,7 +384,7 @@ export default function CadastroParticipantes() {
                 <tr key={admin.idParticipante} onClick={() => !isEditing && setSelectedId(admin.idParticipante)} className={selectedId === admin.idParticipante ? 'bg-green-200' : ''}>
                   <td className="w-1/12 border border-gray-500 px-2 py-0 p-0 whitespace-nowrap text-left">{admin.idParticipante}</td>
                   <td className="w-7/12 border border-gray-500 px-2 py-0 p-0 whitespace-nowrap text-left">{admin.nome}</td>
-                  <td className="w-4/12 border border-gray-500 px-2 py-0 p-0 whitespace-nowrap text-left">{admin.usuario}</td>
+                  <td className="w-4/12 border border-gray-500 px-2 py-0 p-0 whitespace-nowrap text-left">{formatPhoneNumber(admin.Fone)}</td>
                 </tr>
               ))}
             </tbody>

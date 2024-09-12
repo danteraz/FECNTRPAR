@@ -1,6 +1,7 @@
 const { query } = require('../../../../becntrpar/config/db');
 
 export default async function handler(req, res) {
+
   if (req.method === 'GET') {
     try {
       const result = await query('SELECT * FROM palestras ORDER BY idPalestra');
