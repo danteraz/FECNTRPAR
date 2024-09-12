@@ -35,8 +35,6 @@ export default function CadastroPalestras() {
   useEffect(() => {
     async function fetchPalestras() {
 
-      console.log("ENTROU NA TELA PALESTRA")
-
       const res = await fetch('/api/palestras');
       const data = await res.json();
       setPalestras(data);
@@ -305,7 +303,7 @@ export default function CadastroPalestras() {
         </div>
 
         {/* Área de Dados (C22) - Cadastro de palestras */}
-        <div className="relative flex flex-col border border-black rounded-lg p-2 space-y-4">
+        <div className="relative flex flex-col border border-black rounded-lg p-2 space-y-2">
           {/* Título da Seção */}
           <h2 className="text-xl font-bold text-center">CADASTRO DE PALESTRAS</h2>
           <hr className="border-t-2 border-black w-full mb-4" />
@@ -316,28 +314,29 @@ export default function CadastroPalestras() {
           </div>
 
           {/* Labels e Inputs  <div className="text-left mb-4">Palestra: <strong>{idcodigo}</strong>*/}
-          <div className="flex flex-col space-y-1">
-            <div className="text-left mb-4">Palestra: <strong>{idcodigo}</strong>
+          <div className="flex flex-col space-y-1">  {/* Aplica um espaçamento de 4px entre as linhas */}
+            <div className="text-left">
+              Palestra: <strong>{idcodigo}</strong>
               <label className="ml-4 mr-2 text-sm">Data:</label>
-              <input type="date" value={datapalestra} onChange={(e) => setDataPalestra(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 rounded flex-1" />
+              <input type="date" value={datapalestra} onChange={(e) => setDataPalestra(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 p-0 h-6 rounded flex-1" />
               <label className="ml-4 mr-2 text-sm">Hora:</label>
-              <input type="time" value={hora} onChange={(e) => setHora(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 rounded flex-1" />
+              <input type="time" value={hora} onChange={(e) => setHora(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 p-0 h-6 rounded flex-1" />
             </div>
             <div className="flex items-center">
               <label className="mr-2 text-sm">Título:</label>
-              <input type="text" maxlength="100" value={titulo} onChange={(e) => setTitulo(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 rounded flex-1" />
+              <input type="text" maxlength="100" value={titulo} onChange={(e) => setTitulo(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 p-0 h-6 rounded flex-1" />
             </div>
             <div className="flex items-center">
               <label className="mr-2 text-sm">Assunto:</label>
-              <input type="text" maxlength="100" value={assunto} onChange={(e) => setAssunto(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 rounded flex-1" />
+              <input type="text" maxlength="100" value={assunto} onChange={(e) => setAssunto(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 p-0 h-6 rounded flex-1" />
             </div>
             <div className="flex items-center">
               <label className="mr-2 text-sm">Organizador:</label>
-              <input type="text" maxlength="100" value={organizador} onChange={(e) => setOrganizador(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 rounded flex-1" />
+              <input type="text" maxlength="100" value={organizador} onChange={(e) => setOrganizador(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 p-0 h-6 rounded flex-1" />
             </div>
             <div className="flex items-center">
               <label className="mr-2 text-sm">Local:</label>
-              <input type="text" maxlength="100" value={localpalestra} onChange={(e) => setLocalPalestra(e.target.value)} disabled={isImpDisabled} className="border p-0 h-6 rounded flex-1" />
+              <input type="text" maxlength="100" value={localpalestra} onChange={(e) => setLocalPalestra(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 p-0 h-6 rounded flex-1" />
             </div>
           </div>
 

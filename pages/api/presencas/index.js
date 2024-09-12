@@ -1,33 +1,39 @@
-//import { query } from '../../../config/db';
 const { query } = require('../../../../becntrpar/config/db');
 
 export default async function handler(req, res) {
 
-  console.log("Entrou no INDEX de PRESENÇA",req.method)
+  const { idPalestra } = req.query;
 
   if (req.method === 'GET') {
     try {
-      const result = await query('SELECT * FROM palestras ORDER BY idPalestra');
-      res.status(200).json(result);
+      const query = `SELECT p.nome FROM presencas pr
+                     JOIN participantes p ON p.idParticipante = pr.idParticipante
+                     WHERE pr.idPalestra = ?`;
+      const [rows] = await db.query(query, [idPalestra]);
+      res.status(200).json(rows);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Erro ao buscar palestras' });
+      res.status(500).json({ message: 'Erro ao buscar presenças', error });
     }
   } else if (req.method === 'POST') {
     const { idPalestra, idParticipante } = req.body;
-
-    if (!idPalestra || !idParticipante) {
-      return res.status(400).json({ message: 'Dados incompletos.' });
-    }
-
     try {
-      const result = await query(
-        'INSERT INTO presencas (idPalestra, idParticipante) VALUES (?, ?)',
-        [idPalestra, idParticipante]
-      );
-      res.status(201).json(result);
+      const query = `INSERT INTO presencas (idPalestra, idParticipante) VALUES (?, ?)`;
+      await db.query(query, [idPalestra, idParticipante]);
+      res.status(200).json({ message: 'Presença adicionada com sucesso' });
     } catch (error) {
       res.status(500).json({ message: 'Erro ao adicionar presença', error });
     }
+  } else if (req.method === 'DELETE') {
+    const { idParticipante } = req.query;
+    try {
+      const query = `DELETE FROM presencas WHERE idParticipante = ? AND idPalestra = ?`;
+      await db.query(query, [idParticipante, idPalestra]);
+      res.status(200).json({ message: 'Presença removida com sucesso' });
+    } catch (error) {
+      res.status(500).json({ message: 'Erro ao remover presença', error });
+    }
+  } else {
+    res.status(405).json({ message: 'Método não permitido' });
   }
+  
 }

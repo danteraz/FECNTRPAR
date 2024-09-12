@@ -2,12 +2,15 @@ const { query } = require('../../../../becntrpar/config/db');
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
+    const { excludePresenca } = req.query;
+
     try {
-      const result = await query('SELECT * FROM participantes ORDER BY idParticipante');
-      res.status(200).json(result);
+      const query = `SELECT nome FROM participantes WHERE idParticipante NOT IN 
+                     (SELECT idParticipante FROM presencas WHERE idPalestra = ?)`;
+      const [rows] = await db.query(query, [excludePresenca]);
+      res.status(200).json(rows);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Erro ao buscar participantes' });
+      res.status(500).json({ message: 'Erro ao buscar participantes', error });
     }
   } else if (req.method === 'POST') {
     const { nome, fone, email, mensagem } = req.body;

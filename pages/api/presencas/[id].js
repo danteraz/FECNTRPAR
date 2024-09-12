@@ -2,8 +2,6 @@ import { query } from '../../../../becntrpar/config/db';
 
 export default async function handler(req, res) {
 
-  console.log("Entrou no ID de PRESENÇA",req.method)
-
   if (req.method === 'DELETE') {
     const { idParticipante } = req.query;
     const { idPalestra } = req.body;
