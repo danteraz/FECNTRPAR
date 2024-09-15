@@ -1,8 +1,9 @@
-import { query } from '../../../../becntrpar/config/db';
+const { query } = require('../../../../becntrpar/config/db');
+
 export default async function handler(req, res) {
   const { id } = req.query;
 
-  if (req.method === 'PUT') {
+if (req.method === 'PUT') {
     const { nome, fone, email, mensagem } = req.body;
     
     // Validação dos campos

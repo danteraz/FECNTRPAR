@@ -120,7 +120,7 @@ export default function CadastroParticipantes() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ nome, fone, email, mensagem: mensagemValor }),
+        body: JSON.stringify({ nome, fone: foneLimpo, email, mensagem: mensagemValor }),
       });
       const result = await response.json();
 
