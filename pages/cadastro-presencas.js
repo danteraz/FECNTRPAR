@@ -313,68 +313,14 @@ export default function CadastroPresencas() {
                   >
                     {conf.idParticipante} - {conf.nome}
                     {conf.presente === 1 && <span> ✔️</span>} {/* Exibe o símbolo "marcado" */}
-
                   </li>
                 ))}
               </ul>
             </div>
           </div>
-
-          {/* Listboxes 
-          <div className="flex justify-between">
-            <div className="w-5/12 border border-gray-500 p-2">
-              <h3 className="font-bold text-center mb-2">Participantes</h3>
-              <ul className="h-32 overflow-auto">
-                  {Array.isArray(participantes) && participantes.map((part) => (
-                    <li key={part.idParticipante} onClick={() => adicionarPresenca(part.idParticipante)} 
-                        className="cursor-pointer hover:bg-gray-200 px-2 py-1">
-                      {part.nome}
-                    </li>
-                  ))}
-              </ul>
-            </div>
-            */}
-            {/* Botões de Adicionar e Remover 
-            <div className="flex flex-col justify-center space-y-4 mx-4">
-              <button
-                onClick={() => {
-                  if (participantes.length > 0) {
-                    adicionarPresenca(selectedParticipante);
-                  }
-                }}
-                className="bg-gray-200 hover:bg-gray-300 text-black px-2 py-1 rounded"
-              >
-                &rarr;
-              </button>
-              <button
-                onClick={() => {
-                  if (confirmados.length > 0) {
-                    removerPresenca(selectedConfirmado);
-                  }
-                }}
-                className="bg-gray-200 hover:bg-gray-300 text-black px-2 py-1 rounded"
-              >
-                &larr;
-              </button>
-            </div>
-            */}
-            {/* Listbox Confirmados 
-            <div className="w-5/12 border border-gray-500 p-2">
-              <h3 className="font-bold text-center mb-2">Confirmados</h3>
-              <ul className="h-32 overflow-auto">
-                {Array.isArray(confirmados) && confirmados.map((conf) => (
-                  <li key={conf.confirmados} onClick={() => adicionarPresenca(conf.confirmados)} 
-                      className="cursor-pointer hover:bg-gray-200 px-2 py-1">
-                    {conf.nome}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>  
-          */}
         </div>
       </div>
     </div>
-    );
-  }
+  );
+}
   
