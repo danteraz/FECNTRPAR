@@ -98,7 +98,7 @@ export default function CadastroParticipantes() {
     
         if (response.status === 400) {
           // Já existe um participante com este fone
-          setOpcao(result.error || 'Erro ao processar a requisição');
+          setOpcao(result.error || 'Já existe um participante com este fone!');
           // Retornar a mensagem após 3 segundos
           setTimeout(() => {
             setOpcao(opcao);
@@ -343,26 +343,38 @@ export default function CadastroParticipantes() {
           <div className="flex flex-col space-y-1">
             <div className="flex items-center">
               <label className="mr-2 text-sm">Nome:</label>
-              <input type="text" maxlength="60" value={nome} onChange={(e) => setNome(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 p-0 h-6 flex-1" />
+              <input type="text" required maxlength="60"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                disabled={isImpDisabled}
+                className="border border-gray-800 p-0 h-6 flex-1 rounded"
+              />
             </div>
             <div className="flex items-center">
               <label className="mr-2 text-sm">Celular:</label>
-              <input  type="text" maxlength="11" 
-                      value={fone} 
-                      onChange={(e) => setFone(e.target.value)} 
-                      onFocus={handleFocus}
-                      onBlur={handleBlur}
-                      placeholder="Digite apenas número no formato DDDNÚMERO com 11 dígitos"
-                      disabled={isImpDisabled} 
-                      className="border border-gray-800 p-0 h-6 flex-1" />
+              <input  
+                type="tel" required maxlength="11" 
+                value={fone} 
+                onChange={(e) => setFone(e.target.value)} 
+                onFocus={handleFocus}
+                onBlur={handleBlur}
+                placeholder="Digite 11 números (DDDNÚMERO)"
+                disabled={isImpDisabled} 
+                className="border border-gray-800 p-0 pl-2 rounded w-80"
+              />
             </div>
             <div className="flex items-center">
               <label className="mr-2 text-sm">E-mail:</label>
-              <input type="text" maxlength="100" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 p-0 h-6 flex-1" />
+              <input type="email" maxlength="100"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isImpDisabled}
+                className="border border-gray-800 p-0 h-6 flex-1 rounded"
+              />
             </div>
             <div className="flex items-center">
               <label className="mr-2 text-sm">Mensagem:</label>
-              <select value={mensagem} onChange={(e) => setMensagem(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 p-0 h-6 w-32">
+              <select value={mensagem} onChange={(e) => setMensagem(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 p-0 h-6 w-32 rounded">
                 <option value="          ">          </option>
                 <option value="1">Fone</option>
                 <option value="2">E-mail</option>

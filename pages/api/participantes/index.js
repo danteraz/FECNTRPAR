@@ -5,8 +5,6 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     const { excludePresenca } = req.query;
 
-    console.log("Valor de excludePresenca:", excludePresenca); // Adicione para verificar o valor
-    
     //  CHAMADA PARA POPULAR O LISTBOX DOS PARTICIPANTES AINDA SEM PALESTRA
     if  (excludePresenca) {
       try {
@@ -21,7 +19,6 @@ export default async function handler(req, res) {
         `;  
         const rows = await query(sql, [excludePresenca]);
 
-        console.log("Participantes retornados:", rows); // Adicione para verificar se a query retorna valores
         if (rows.length === 0) {
           console.warn('Nenhum participante encontrado');
         }
@@ -53,7 +50,6 @@ export default async function handler(req, res) {
     if (!nome || !fone ) {
       return res.status(400).json({ error: 'Existe Campo obrigatório NÃO Preenchido!' });
     }
-    console.log(nome, fone, email, mensagem)
 
     try {
       const result = await query(

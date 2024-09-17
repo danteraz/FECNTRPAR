@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
+import QRCode from 'react-qr-code';  // Adicionado para gerar o QRCode
+
 export default function GeracaoQRCode() {
 
   const router = useRouter();
@@ -18,6 +20,9 @@ export default function GeracaoQRCode() {
   const [mensagem, setMensagem] = useState('');
   const [isNavDisabled, setIsNavDisabled] = useState(false);
   const [isListDisabled, setisListDisabled] = useState(false);
+
+  const [qrCodeUrl, setQrCodeUrl] = useState('');  // Novo estado para a URL do QRCode
+  const [isPrintDisabled, setIsPrintDisabled] = useState(true); // Desabilita o botão de imprimir por padrão
 
   //  COLOCAR O INPUT DE IDPALESTRA EM FOCO
   const inputRef = useRef(null);  // Criando uma referência ao input
@@ -48,14 +53,19 @@ export default function GeracaoQRCode() {
         if (dataHoraPalestra < now) {
             disableListbox(true); // Desabilita a navegação para manutenção dos participantes
             setMensagem('Esta Palastra Já Ocorreu e Será apenas Visualizada.');
-
+            setQrCodeUrl(''); // Não gera o QRCode se a palestra já ocorreu
+            setIsPrintDisabled(true); // Desabilita o botão de impressão
+  
             // Limpa a mensagem após 3 segundos
             setTimeout(() => {
               setMensagem(' ');
               //inputRef.current.focus();
             }, 3000);
         } else {
-            disableListbox(false); // Habilita as ações se a palestra não ocorreu ainda
+          //const qrCodeLink = `http://localhost:3000/participante-qrcode?idPalestra=${id}`;
+          const qrCodeLink = `https://www.msn.com/pt-br/noticias/ciencia-e-tecnologia/al%C3%A9m-de-caminhada-espacial-quais-experimentos-s%C3%A3o-feitos-na-miss%C3%A3o-polaris-dawn/ar-AA1qwOth?ocid=msedgntp&pc=U531&cvid=096264e60e204540a21024f8807777bc&ei=15`;
+          setQrCodeUrl(qrCodeLink); // Gera o QRCode
+          setIsPrintDisabled(false); // Habilita o botão de impressão
         }
 
         const formattedDate = new Date(DadosPalestra.dataPalestra).toLocaleDateString('pt-BR')
@@ -65,9 +75,6 @@ export default function GeracaoQRCode() {
         setAssunto(DadosPalestra.assunto);
         setLocalPalestra(DadosPalestra.localPalestra);
         
-        //  Popula os listboxes de Participantes e Confirmados
-        fetchParticipantes(id);
-        fetchConfirmados(id);
       } else {
 
         setMensagem('Palestra Não Cadastrada');
@@ -162,13 +169,17 @@ export default function GeracaoQRCode() {
     router.push('/login');
   };
 
+  const handlePrint = () => {
+    window.print();  // Função nativa do JavaScript para imprimir a página
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100">
       <div className="grid w-full h-full max-w-full max-h-full bg-white rounded shadow-md p-4"
         style={{ gridTemplateRows: '0fr 3.5fr', gridTemplateColumns: '0.5fr 2.0fr' }}
       >
         {/* C11: Área da Imagem */}
-        <div className="flex flex-col items-center justify-center">
+        <div className="imagem-cipa flex flex-col items-center justify-center">
           <Image src="/CIPA.PNG" alt="CIPA" width={100} height={100} />
         </div>
 
@@ -178,7 +189,7 @@ export default function GeracaoQRCode() {
         </div>
 
         {/* C21: Menu Lateral */}
-        <div className="flex flex-col justify-center border border-black rounded-lg p-2 space-y-4">
+        <div className="menu-container flex flex-col justify-center border border-black rounded-lg p-2 space-y-4">
           <button
             type="button"
             onClick={() => handleNavigation('/cadastro-administradores')}
@@ -245,8 +256,8 @@ export default function GeracaoQRCode() {
         </div>
 
         {/* C22: Área de Geração de QRCODE */}
-        <div className="relative flex flex-col border border-black rounded-lg p-2 space-y-2">
-          <h2 className="text-xl font-bold text-center">GERAÇÃO DE QRCODE</h2>
+        <div className="dados-container relative flex flex-col border border-black rounded-lg p-2 space-y-2">
+          <h2 className="titulo-secao text-xl font-bold text-center">GERAÇÃO DE QRCODE</h2>
           <hr className="border-t-2 border-black w-full mb-4" />
 
           {/* Input da Palestra */}
@@ -283,15 +294,83 @@ export default function GeracaoQRCode() {
             <span>{localPalestra}</span>
           </div>
 
-          <div className="flex justify-between">
-            {/* QRCODE */}
-            <div className="border rounded -lg border-gray-500 p-2">
+          {qrCodeUrl && (
+            <div className="flex justify-center mt-4">
+              <QRCode value={qrCodeUrl} size={200} />
             </div>
-
+          )}
+          
+          {/* Botão de Imprimir */}
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={handlePrint}
+              className={`bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 ${isPrintDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isPrintDisabled} // Desabilita o botão se não atender às condições
+            >
+              Imprimir QRCode e Dados da Palestra
+            </button>
           </div>
-
         </div>
+
+        {/* CSS específico para impressão */}
+        <style jsx>{`
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            .grid, .grid * {
+              visibility: visible;
+            }
+            .grid {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+            }
+
+            /* Alterações específicas para a impressão */
+
+            .grid .flex.items-center.justify-center h1 {
+              display: none; /* Esconde o título "CONTROLE DE PALESTRAS" */
+            }
+
+            /* Mover a imagem "CIPA" para o centro da célula C12 */
+            .grid .flex.flex-col.items-center.justify-center {
+              position: relative;
+            }
+
+            .grid .flex.flex-col.items-center.justify-center img {
+              position: absolute;
+              top: 0;
+              left: 50%;
+              transform: translateX(-50%);
+              width: 100px; /* Ajusta o tamanho da imagem */
+              margin-top: 20px; /* Ajuste para garantir que fique no centro */
+            }
+
+            /* 2. Remover a borda esquerda */
+            .menu-container {
+              border: none;
+            }
+
+            /* 3. Substituir "GERAÇÃO DE QRCODE" por "INSCRIÇÃO NA PALESTRA" */
+            .grid .relative.flex.flex-col.border h2 {
+              visibility: hidden; /* Esconde o texto "GERAÇÃO DE QRCODE" */
+            }
+            .grid .relative.flex.flex-col.border h2::before {
+              content: "INSCRIÇÃO NA PALESTRA"; /* Substitui o texto para impressão */
+              visibility: visible;
+              display: block;
+              text-align: center;
+            }
+
+            /* 4. Ocultar o botão na impressão */
+            button {
+              display: none;
+            }
+          }
+        `}</style>
       </div>
     </div>
-    );
+  );
 }

@@ -7,12 +7,15 @@ export default async function handler(req, res) {
   if  (req.method === 'GET') {
     try {
       const sql = `
-      SELECT pre.idParticipante, pre.presente, par.nome 
-      FROM presencas pre, participantes par
-      WHERE pre.idPalestra = ?
-            AND par.idParticipante = pre.idParticipante
+      SELECT idParticipante, nome 
+      FROM participantes 
+      WHERE idParticipante IN (
+        SELECT idParticipante 
+        FROM presencas 
+        WHERE idPalestra = ?
+      )
       `;  
-       const rows = await query(sql, [idPalestra]);
+      const rows = await query(sql, [idPalestra]);
       
       if (rows.length === 0) {
         console.warn('Nenhuma Presença encontrada');
@@ -28,6 +31,7 @@ export default async function handler(req, res) {
   } else if (req.method === 'POST') {
     const { idPalestra, idParticipante } = req.body;
     try {
+      console.log("VAI DAR INSERT PRESENÇA ",idPalestra, idParticipante)
       const query = `INSERT INTO presencas (idPalestra, idParticipante) VALUES (?, ?)`;
       await query(query, [idPalestra, idParticipante]);
       res.status(200).json({ message: 'Presença adicionada com sucesso' });

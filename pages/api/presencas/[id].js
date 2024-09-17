@@ -1,7 +1,39 @@
 import { query } from '../../../../becntrpar/config/db';
 
 export default async function handler(req, res) {
-  if (req.method === 'DELETE') {
+
+  const { id: idParticipante } = req.query; // O 'id' é obtido da rota dinâmica
+  const { idPalestra } = req.query;
+  console.log("Recebendo os parâmetros no [id].js", idParticipante,idPalestra)
+  if  (req.method === 'GET') {
+    try {
+      // Lista todos participantes de uma palestra (Listbox de Confirmados - cdastro-presenca.js)
+      let sql = `
+      SELECT pre.idParticipante, pre.presente, par.nome 
+      FROM presencas pre, participantes par
+      WHERE pre.idPalestra = ?
+            AND par.idParticipante = pre.idParticipante
+      `;  
+      const values = [idPalestra];
+   
+      // Verifica de participante inscrito na palestra (Inscrição por QRCODE - participante-qrcode.js)
+      if (idParticipante) {
+        sql += ' AND par.idParticipante = ?';
+        values.push(idParticipante);
+       }
+       const rows = await query(sql, values);
+
+      if (rows.length === 0) {
+        console.warn('Nenhuma Presença encontrada');
+      }
+      res.status(200).json(rows);
+    } catch (error) {
+      console.error("Erro ao buscar presenças:", error.message); // Exibe a mensagem do erro
+      console.error("Detalhes do erro:", error); // Exibe detalhes completos do erro
+
+      res.status(500).json({ message: 'Erro ao buscar presenças', error });
+    }
+  }  if (req.method === 'DELETE') {
     const { id } = req.query; // id do participante
     const { idPalestra } = req.query; // id da palestra
 
