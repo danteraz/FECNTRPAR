@@ -56,7 +56,10 @@ export default async function handler(req, res) {
         'INSERT INTO participantes (nome, fone, email, mensagem) VALUES (?, ?, ?, ?)',
         [nome, fone, email, mensagem]
       );
-      res.status(201).json({ success: true });
+
+      // Aqui estamos capturando o insertId, que é o ID gerado pelo MySQL
+      const id = result.insertId;
+      res.status(201).json({ success: true, id: id });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Erro ao inserir participante' });

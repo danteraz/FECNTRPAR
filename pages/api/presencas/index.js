@@ -31,7 +31,6 @@ export default async function handler(req, res) {
   } else if (req.method === 'POST') {
     const { idPalestra, idParticipante } = req.body;
     try {
-      console.log("VAI DAR INSERT PRESENÇA ",idPalestra, idParticipante)
       const query = `INSERT INTO presencas (idPalestra, idParticipante) VALUES (?, ?)`;
       await query(query, [idPalestra, idParticipante]);
       res.status(200).json({ message: 'Presença adicionada com sucesso' });
@@ -40,6 +39,7 @@ export default async function handler(req, res) {
     }
   } else if (req.method === 'DELETE') {
     const { idParticipante } = req.query;
+
     try {
       const query = `DELETE FROM presencas WHERE idParticipante = ? AND idPalestra = ?`;
       await query(query, [idParticipante, idPalestra]);

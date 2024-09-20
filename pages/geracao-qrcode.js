@@ -157,7 +157,6 @@ export default function GeracaoQRCode() {
   };
 
   const disableListbox = (status) => {
-    console.log("STATUS = ", status)
     setisListDisabled(status);
   };
 
