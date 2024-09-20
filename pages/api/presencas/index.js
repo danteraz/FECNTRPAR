@@ -7,20 +7,16 @@ export default async function handler(req, res) {
   if  (req.method === 'GET') {
     try {
       const sql = `
-      SELECT idParticipante, nome 
-      FROM participantes 
-      WHERE idParticipante IN (
-        SELECT idParticipante 
-        FROM presencas 
-        WHERE idPalestra = ?
-      )
+      SELECT pre.idParticipante, par.nome, par.fone, pre.sorteado, pre.presente
+      FROM presencas pre, participantes par
+      WHERE pre.idPalestra = ?
+            AND par.idParticipante = pre.idParticipante
       `;  
       const rows = await query(sql, [idPalestra]);
       
       if (rows.length === 0) {
         console.warn('Nenhuma Presença encontrada');
       }
- 
       res.status(200).json(rows);
     } catch (error) {
       console.error("Erro ao buscar presenças:", error.message); // Exibe a mensagem do erro

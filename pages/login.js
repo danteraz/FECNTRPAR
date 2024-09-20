@@ -61,7 +61,8 @@ export default function Login() {
 
     const data = await response.json();
 
-    if (response.ok && data.exists) {
+    //if (response.ok && data.exists) {
+    if (response.status === 400) {
       router.push(`/esqueci-senha?usuario=${usuario}`);
     } else {
       setMensagem('Usuário Não Cadastrado');
@@ -127,7 +128,7 @@ export default function Login() {
             <div className="flex space-x-4 mt-4">
               <button
                 type="button"
-                onClick={() => router.push('/cadastro')}
+                onClick={() => router.push('/cadastro-administradores')}
                 className="bg-green-500 text-white py-2 px-4 rounded"
               >
                 Cadastrar

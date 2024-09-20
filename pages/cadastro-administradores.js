@@ -121,7 +121,7 @@ export default function CadastroAdministradores() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ nome, fone, email, usuario, mensagem: mensagemValor }),
+        body: JSON.stringify({ nome, fone: foneLimpo, email, usuario, mensagem: mensagemValor }),
       });
       const result = await response.json();
 

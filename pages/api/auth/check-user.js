@@ -2,10 +2,19 @@ import { query } from '../../../../becntrpar/config/db';
 
 export default async function handler(req, res) {
   const { usuario, idAdministrador } = req.query;
+  let consultausr = ''
+
+  //  Usuario indefinido vem do botão "Esqueci a Senha" do login.js então pega do Body
+  if (!usuario) {
+    // Se for uma alteração, exclua o próprio administrador da verificação
+    consultausr = req.body.usuario
+  } else {
+    consultausr = usuario
+  }
 
   try {
     let sql = 'SELECT COUNT(*) as count FROM administradores WHERE usuario = ?';
-    const values = [usuario];
+    const values = [consultausr];
 
     if (idAdministrador) {
       // Se for uma alteração, exclua o próprio administrador da verificação

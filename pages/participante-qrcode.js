@@ -167,7 +167,10 @@ export default function ParticipanteQRCode() {
             },
             body: JSON.stringify({ nome, fone: foneLimpo, email, mensagem: mensagemValor }),
           });
-   
+
+          // Inscrever na palestra
+          inscreverParticipante(idParticipante,idPalestra) 
+
           //  INCLUI PARTICIPANTE
         } else {
           // Criar novo participante e inscrever na palestra
@@ -182,6 +185,8 @@ export default function ParticipanteQRCode() {
           setIdParticipante(novoParticipante.id);
     
           // Inscrever na palestra
+          inscreverParticipante(novoParticipante.id,idPalestra) 
+/*
           const responsePresenca = await fetch('/api/adicionarPresenca', {
             method: 'POST',
             headers: {
@@ -196,9 +201,9 @@ export default function ParticipanteQRCode() {
           if (responsePresenca.ok) {
             setStatusInscricao("Inscrição confirmada!");
           }
+*/
         }
-
-        
+      
       } catch (error) {
         console.error("Erro ao confirmar inscrição:", error);
       }
@@ -217,6 +222,28 @@ export default function ParticipanteQRCode() {
     setInputDisabled(true); // Habilita a Entrada do Participante se a palestra não ocorreu ainda
     setMostraBotao('')
 
+  };
+
+  const inscreverParticipante = async (CodParticipante,CodPalestra) => {
+    try {
+      const responsePresenca = await fetch('/api/adicionarPresenca', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idPalestra: CodPalestra,
+          idParticipante: CodParticipante,
+        }),
+      });
+
+      if (responsePresenca.ok) {
+        setStatusInscricao("Inscrição confirmada!");
+      }
+
+    } catch (error) {
+      console.error("Erro ao verificar inscrição:", error);
+    }
   };
 
   return (
@@ -263,8 +290,8 @@ export default function ParticipanteQRCode() {
           {/* Labels e Inputs do Participante*/}
           <div className="flex items-center">
             <label className="mr-2 text-sm">Celular:</label>
-            <input  
-              type="tel" required maxlength="11" 
+            <input
+              type="tel" required maxlength="11"
               value={fone} 
               onChange={(e) => setFone(e.target.value)} 
               onFocus={handleFocus}
@@ -310,7 +337,6 @@ export default function ParticipanteQRCode() {
           </div>
 
           <div className="mt-4 text-red-500">{statusInscricao}</div>
-          <div className="mt-4 text-red-500">{MostraBotao}</div>
 
           {/* Botão Único: Confirmar ou Remover Inscrição */}
           {MostraBotao && (
