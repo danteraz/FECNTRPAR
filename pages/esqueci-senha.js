@@ -80,7 +80,6 @@ export default function EsqueciSenha() {
               className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
               style={{ top: '25%' }}
             >
-              {mostrarSenha ? "👁️" : "🙈"}
             </span>
           </div>
           <div className="mb-4 relative w-full max-w-sm mx-auto">
@@ -96,7 +95,6 @@ export default function EsqueciSenha() {
               className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
               style={{ top: '25%' }}
             >
-              {mostrarSenha ? "👁️" : "🙈"}
             </span>
           </div>
           <div className="flex space-x-4">

@@ -6,9 +6,9 @@ export default async function handler(req, res) {
   const { idPalestra } = req.query;
   if  (req.method === 'GET') {
     try {
-      // Lista todos participantes de uma palestra (Listbox de Confirmados - cdastro-presenca.js)
+      // Lista todos participantes de uma palestra (Listbox de Confirmados - cdastro-presenca.js e sorteio.js)
       let sql = `
-      SELECT pre.idParticipante, pre.presente, par.nome 
+      SELECT pre.idParticipante, pre.presente, par.nome, pre.sorteado
       FROM presencas pre, participantes par
       WHERE pre.idPalestra = ?
             AND par.idParticipante = pre.idParticipante
