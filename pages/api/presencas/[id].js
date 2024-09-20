@@ -4,7 +4,6 @@ export default async function handler(req, res) {
 
   const { id: idParticipante } = req.query; // O 'id' é obtido da rota dinâmica
   const { idPalestra } = req.query;
-  console.log("Recebendo os parâmetros no [id].js", idParticipante,idPalestra)
   if  (req.method === 'GET') {
     try {
       // Lista todos participantes de uma palestra (Listbox de Confirmados - cdastro-presenca.js)
@@ -36,7 +35,7 @@ export default async function handler(req, res) {
   }  if (req.method === 'DELETE') {
     const { id } = req.query; // id do participante
     const { idPalestra } = req.query; // id da palestra
-
+  
     if (!id || !idPalestra) {
       return res.status(400).json({ message: 'Dados incompletos.' });
     }

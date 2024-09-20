@@ -150,7 +150,6 @@ export default function CadastroPresencas() {
   };
 
   const disableListbox = (status) => {
-    console.log("STATUS = ", status)
     setisListDisabled(status);
   };
 
