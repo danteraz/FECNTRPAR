@@ -1,20 +1,25 @@
-const { query } = require('../../../../becntrpar/config/db');
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { usuario, senha } = req.body;
+
     try {
-      const result = await query(
-        'UPDATE administradores SET senha = ? WHERE usuario = ?',
-        [senha, usuario]
-      );
-      if (result.affectedRows > 0) {
-        res.status(200).json({ success: true });
-      } else {
+      // Atualiza a senha do administrador baseado no nome de usuário
+      const { data, error } = await supabase
+        .from('administradores')
+        .update({ Senha: senha })
+        .eq('Usuario', usuario); // Supondo que o campo no Supabase seja "Usuario" com "U" maiúsculo
+
+      if (error || data.length === 0) {
         res.status(500).json({ error: 'Senha Não Alterada! Procure o Responsável pelo App' });
+      } else {
+        res.status(200).json({ success: true });
       }
     } catch (error) {
-      console.error(error); // Log do erro para inspeção
+      console.error('Erro ao alterar senha:', error);
       res.status(500).json({ error: 'Erro no servidor ao tentar alterar a senha' });
     }
   } else {

@@ -1,30 +1,28 @@
-import { query } from '../../../../becntrpar/config/db';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 export default async function handler(req, res) {
   const { usuario, idAdministrador } = req.query;
-  let consultausr = ''
-
-  //  Usuario indefinido vem do botão "Esqueci a Senha" do login.js então pega do Body
-  if (!usuario) {
-    // Se for uma alteração, exclua o próprio administrador da verificação
-    consultausr = req.body.usuario
-  } else {
-    consultausr = usuario
-  }
+  let consultausr = usuario || req.body.usuario; // Pega o usuário do corpo da requisição, se necessário
 
   try {
-    let sql = 'SELECT COUNT(*) as count FROM administradores WHERE usuario = ?';
-    const values = [consultausr];
+    // Consulta para verificar se o usuário já existe
+    let query = supabase
+      .from('administradores')
+      .select('count', { count: 'exact' }) // Contagem exata
+      .eq('Usuario', consultausr); // Supondo que o campo no Supabase seja "Usuario" com "U" maiúsculo
 
     if (idAdministrador) {
       // Se for uma alteração, exclua o próprio administrador da verificação
-      sql += ' AND idAdministrador != ?';
-      values.push(idAdministrador);
+      query = query.neq('idAdministrador', idAdministrador);
     }
 
-    const [result] = await query(sql, values);
+    const { count, error } = await query;
 
-    if (result.count > 0) {
+    if (error) throw error;
+
+    if (count > 0) {
       return res.status(400).json({ error: 'Já existe um administrador com este Usuário!' });
     } else {
       res.status(200).json({ message: 'Usuário disponível.' });

@@ -1,24 +1,28 @@
-import { query } from '../../../../becntrpar/config/db';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 export default async function handler(req, res) {
   const { fone, idParticipante } = req.query;
 
   try {
-    //let sql = 'SELECT COUNT(*) as count FROM participantes WHERE fone = ?';
-    let sql = 'SELECT * FROM participantes WHERE fone = ?';
-    const values = [fone];
+    // Busca o participante com o telefone informado
+    let query = supabase
+      .from('participantes')
+      .select('*')
+      .eq('Fone', fone); // Supondo que o campo seja "Fone" com "F" maiúsculo
 
+    // Se for uma alteração, exclua o próprio participante da verificação
     if (idParticipante) {
-      // Se for uma alteração, exclua o próprio participante da verificação
-      sql += ' AND idParticipante != ?';
-      values.push(idParticipante);
+      query = query.neq('idParticipante', idParticipante);
     }
 
-    const [result] = await query(sql, values);
-    
-    if (result.idParticipante) {
+    const { data, error } = await query;
 
-      return res.status(400).json(result);
+    if (error) throw error;
+
+    if (data.length > 0) {
+      res.status(400).json(data[0]); // Retorna o participante com o mesmo telefone
     } else {
       res.status(200).json({ message: 'Fone disponível.' });
     }
