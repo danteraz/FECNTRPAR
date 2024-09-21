@@ -1,22 +1,31 @@
-//const { query } = require('../../../../becntrpar/config/db');
+import { createClient } from '@supabase/supabase-js';
 
-import { query } from '../../../../becntrpar/config/db';
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
 export default async function handler(req, res) {
   const { id } = req.query;
 
   if (req.method === 'PUT') {
     const { nome, fone, email, usuario, mensagem } = req.body;
-    
-    // Validação dos campos
+
     if (!nome || !fone || !email || !usuario) {
       return res.status(400).json({ error: 'Existe Campo obrigatório NÃO Preenchido!' });
     }
 
     try {
-      const result = await query(
-        'UPDATE administradores SET nome = ?, fone = ?, email = ?, usuario = ?, mensagem = ? WHERE idAdministrador = ?',
-        [nome, fone, email, usuario, mensagem, id]
-      );
+      const { error } = await supabase
+      .from('administradores')
+      .update({
+        nome: nome,
+        Fone: fone,  // "Fone" com "F" maiúsculo, porque a coluna foi criada assim
+        email: email,
+        usuario: usuario,
+        mensagem: mensagem
+      })
+      .eq('idAdministrador', id);
+
+      if (error) throw error;
+
       res.status(200).json({ id, nome, fone, email, usuario, mensagem });
     } catch (error) {
       console.error('Erro ao atualizar administrador:', error);
@@ -24,10 +33,13 @@ export default async function handler(req, res) {
     }
   } else if (req.method === 'DELETE') {
     try {
-      const result = await query(
-        'DELETE FROM administradores WHERE idAdministrador = ?',
-        [id]
-      );
+      const { error } = await supabase
+        .from('administradores')
+        .delete()
+        .eq('idAdministrador', id);
+
+      if (error) throw error;
+
       res.status(200).json({ success: true });
     } catch (error) {
       console.error('Erro ao excluir administrador:', error);
