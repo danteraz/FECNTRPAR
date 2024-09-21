@@ -1,4 +1,6 @@
-const { query } = require('../../../../becntrpar/config/db');
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
@@ -9,25 +11,25 @@ export default async function handler(req, res) {
     }
 
     try {
-      // Insere o idParticipante e idPalestra na tabela presencas
-      const sqlInsert = `
-        INSERT INTO presencas (idPalestra, idParticipante) 
-        VALUES (?, ?)
-      `;
-      await query(sqlInsert, [idPalestra, idParticipante]);
+      // Inserindo nova presença
+      const { error } = await supabase
+        .from('presencas')
+        .insert([{ idPalestra, idParticipante }]);
 
-      // Após a inserção, retorna a lista de confirmados atualizada
-      const sqlConfirmados = `
-        SELECT p.idParticipante, p.nome 
-        FROM participantes p
-        INNER JOIN presencas pr ON p.idParticipante = pr.idParticipante
-        WHERE pr.idPalestra = ?
-      `;
-      const [confirmados] = await query(sqlConfirmados, [idPalestra]);
+      if (error) throw error;
 
-      res.status(200).json(confirmados); // Envia a lista atualizada de confirmados
+      // INNER JOIN entre participantes e presencas para obter o participante confirmado
+      const { data: confirmados, error: errorConfirmados } = await supabase
+        .from('presencas')
+        .select('participantes(idParticipante, nome)')
+        .eq('idPalestra', idPalestra)
+        .join('participantes', 'participantes.idParticipante', 'presencas.idParticipante');
+
+      if (errorConfirmados) throw errorConfirmados;
+
+      res.status(200).json(confirmados);
     } catch (error) {
-      console.error("Erro ao adicionar presença:", error.message);
+      console.error('Erro ao adicionar presença:', error.message);
       res.status(500).json({ message: 'Erro ao adicionar presença', error });
     }
   } else {

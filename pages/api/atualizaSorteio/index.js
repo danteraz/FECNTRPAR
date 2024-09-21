@@ -1,23 +1,26 @@
-const { query } = require('../../../../becntrpar/config/db');
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { idPalestra, idParticipanteSorteado } = req.body; // Recebe os parâmetros do frontend
+    const { idPalestra, idParticipanteSorteado } = req.body;
 
     try {
-      // Atualiza a tabela 'palestras' para marcar que o sorteio foi realizado
-      const updatePalestraQuery = `
-        UPDATE palestras 
-        SET sorteio = 1 
-        WHERE idPalestra = ?`;
-      await query(updatePalestraQuery, [idPalestra]);
+      const { error: errorPalestra } = await supabase
+        .from('palestras')
+        .update({ sorteio: 1 })
+        .eq('idPalestra', idPalestra);
 
-      // Atualiza a tabela 'presencas' para marcar o participante sorteado
-      const updatePresencaQuery = `
-        UPDATE presencas 
-        SET sorteado = 1 
-        WHERE idParticipante = ? AND idPalestra = ?`;
-      await query(updatePresencaQuery, [idParticipanteSorteado, idPalestra]);
+      if (errorPalestra) throw errorPalestra;
+
+      const { error: errorPresenca } = await supabase
+        .from('presencas')
+        .update({ sorteado: 1 })
+        .eq('idParticipante', idParticipanteSorteado)
+        .eq('idPalestra', idPalestra);
+
+      if (errorPresenca) throw errorPresenca;
 
       res.status(200).json({ message: 'Sorteio atualizado com sucesso!' });
     } catch (error) {
