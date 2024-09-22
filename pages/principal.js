@@ -88,13 +88,12 @@ export default function Principal() {
         {/* Área de Dados (Direita) */}
         <div className="relative flex justify-center items-center border border-black rounded-lg p-2">
           <div className="relative w-full h-full">
-            // <Image src="/Palestra.jpeg" alt="Palestra" layout="fill" objectFit="cover" />
-			<Image
-			  src="/Palestra.jpeg"
-			  alt="Palestra"
-			  fill
-			  style={{ objectFit: 'cover' }}
-			/>			
+            <Image
+              src="/Palestra.jpeg"
+              alt="Palestra"
+              fill
+              style={{ objectFit: 'cover' }}
+            />			
           </div>
         </div>
       </div>

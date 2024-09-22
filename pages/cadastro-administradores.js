@@ -38,7 +38,7 @@ export default function CadastroAdministradores() {
       }
     }
     fetchAdministradores();
-  }, []);
+  }, [fillInputs]);
 
   const handleFocus = () => {
     setFone(fone.replace(/\D/g, ''));
