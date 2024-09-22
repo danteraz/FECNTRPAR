@@ -1,65 +1,60 @@
-import { query } from '../../../../becntrpar/config/db';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 export default async function handler(req, res) {
-
   const { id: idParticipante } = req.query; // O 'id' é obtido da rota dinâmica
   const { idPalestra } = req.query;
-  if  (req.method === 'GET') {
+
+  if (req.method === 'GET') {
     try {
-      // Lista todos participantes de uma palestra (Listbox de Confirmados - cdastro-presenca.js e sorteio.js)
-      let sql = `
-      SELECT pre.idParticipante, pre.presente, par.nome, pre.sorteado
-      FROM presencas pre, participantes par
-      WHERE pre.idPalestra = ?
-            AND par.idParticipante = pre.idParticipante
-      `;  
-      const values = [idPalestra];
-   
-      // Verifica de participante inscrito na palestra (Inscrição por QRCODE - participante-qrcode.js)
+      // Lista todos participantes de uma palestra
+      let query = supabase
+        .from('presencas')
+        .select('idParticipante, presente, sorteado, participantes(nome)')
+        .eq('idPalestra', idPalestra);
+
+      // Verifica se é para listar um participante específico
       if (idParticipante) {
-        sql += ' AND par.idParticipante = ?';
-        values.push(idParticipante);
-       }
-       const rows = await query(sql, values);
-
-      if (rows.length === 0) {
-        console.warn('Nenhuma Presença encontrada');
+        query = query.eq('idParticipante', idParticipante);
       }
-      res.status(200).json(rows);
-    } catch (error) {
-      console.error("Erro ao buscar presenças:", error.message); // Exibe a mensagem do erro
-      console.error("Detalhes do erro:", error); // Exibe detalhes completos do erro
 
+      const { data, error } = await query;
+
+      if (error) throw error;
+      if (data.length === 0) {
+        console.warn('Nenhuma presença encontrada.');
+      }
+
+      res.status(200).json(data);
+    } catch (error) {
+      console.error("Erro ao buscar presenças:", error.message);
       res.status(500).json({ message: 'Erro ao buscar presenças', error });
     }
-  }  if (req.method === 'DELETE') {
+  } else if (req.method === 'DELETE') {
     const { id } = req.query; // id do participante
     const { idPalestra } = req.query; // id da palestra
-  
+
     if (!id || !idPalestra) {
       return res.status(400).json({ message: 'Dados incompletos.' });
     }
 
     try {
-      // Tente executar a query de DELETE
-      const result = await query(
-        'DELETE FROM presencas WHERE idPalestra = ? AND idParticipante = ?',
-        [idPalestra, id]
-      );
+      // Remover presença
+      const { error } = await supabase
+        .from('presencas')
+        .delete()
+        .eq('idPalestra', idPalestra)
+        .eq('idParticipante', id);
 
-      // Se o DELETE não afetou nenhuma linha, avisa o usuário
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: 'Presença não encontrada para este Participante.' });
-      }
+      if (error) throw error;
 
       res.status(200).json({ message: 'Presença removida com sucesso.' });
     } catch (error) {
-      console.error("Erro ao remover presença:", error.message); // Exibe a mensagem de erro
-      console.error("Detalhes do erro:", error); // Exibe os detalhes completos do erro
-
+      console.error("Erro ao remover presença:", error.message);
       res.status(500).json({ message: 'Erro ao remover presença', error });
     }
   } else {
-    res.status(405).json({ message: 'Método não permitido' });
+    res.status(405).json({ message: 'Método não permitido.' });
   }
 }
