@@ -30,7 +30,7 @@ export default function CadastroPalestras() {
   const [isImpDisabled, setIsImpDisabled] = useState(true);
   const [mensagem, setMensagem] = useState('');
 
-  var TemRegistro = false
+  const temRegistroRef = useRef(false);
 
   useEffect(() => {
     async function fetchPalestras() {
@@ -43,11 +43,11 @@ export default function CadastroPalestras() {
       if (data.length > 0) {
         setSelectedId(data[0].idPalestra);
         fillInputs(data[0].idPalestra);
-        TemRegistro = true
+        temRegistroRef = true
       }
     }
     fetchPalestras();
-  }, []);
+  }, [temRegistroRef]);
 
   const handleIncluir = () => {
     setOpcao('INCLUSÃO DE PALESTRA');
@@ -58,7 +58,7 @@ export default function CadastroPalestras() {
   };
 
   const handleAlterar = () => {
-    //if (TemRegistro) {
+    //if (temRegistroRef) {
       setOpcao('ALTERAÇÃO DE PALESTRA');
       setIsEditing(true);
       setIsImpDisabled(false);
@@ -71,7 +71,7 @@ export default function CadastroPalestras() {
   };
 
   const handleExcluir = () => {
-    //if (TemRegistro) {
+    //if (temRegistroRef) {
       setOpcao('EXCLUSÃO DE PALESTRA');
       setIsEditing(true);
       setIsImpDisabled(true);
