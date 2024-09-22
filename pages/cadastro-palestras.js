@@ -43,7 +43,7 @@ export default function CadastroPalestras() {
       if (data.length > 0) {
         setSelectedId(data[0].idPalestra);
         fillInputs(data[0].idPalestra);
-        temRegistroRef = true
+        temRegistroRef.current = true
       }
     }
     fetchPalestras();
