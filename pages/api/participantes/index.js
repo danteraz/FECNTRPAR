@@ -1,70 +1,62 @@
-const { query } = require('../../../../becntrpar/config/db');
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 export default async function handler(req, res) {
-  
   if (req.method === 'GET') {
     const { excludePresenca } = req.query;
 
-    //  CHAMADA PARA POPULAR O LISTBOX DOS PARTICIPANTES AINDA SEM PALESTRA
-    if  (excludePresenca) {
-      try {
-        const sql = `
-          SELECT idParticipante, nome 
-          FROM participantes 
-          WHERE idParticipante NOT IN (
-            SELECT idParticipante 
-            FROM presencas 
-            WHERE idPalestra = ?
-          )
-        `;  
-        const rows = await query(sql, [excludePresenca]);
+    try {
+      // Lista os participantes que não estão na palestra (excludePresenca)
+      if (excludePresenca) {
+        const { data, error } = await supabase
+          .from('participantes')
+          .select('idParticipante, nome')
+          .not('idParticipante', 'in', supabase
+            .from('presencas')
+            .select('idParticipante')
+            .eq('idPalestra', excludePresenca)
+          );
 
-        if (rows.length === 0) {
-          console.warn('Nenhum participante encontrado');
-        }
-  
-        res.status(200).json(rows); // Garante que retorna um array
-      } catch (error) {
-        console.error("Erro ao buscar participantes:", error.message); // Exibe a mensagem do erro
-        console.error("Detalhes do erro:", error); // Exibe detalhes completos do erro
+        if (error) throw error;
 
-        res.status(500).json({ message: 'Erro ao buscar participantes', error });
+        res.status(200).json(data);
+      } else {
+        // Lista todos os participantes
+        const { data, error } = await supabase
+          .from('participantes')
+          .select('*')
+          .order('idParticipante', { ascending: true });
+
+        if (error) throw error;
+
+        res.status(200).json(data);
       }
-
-    //  CHAMADA PARA POPULAR O LISTBOX DE CADASTRO DOS PARTICIPANTES
-    } else {
-      try {
-        const result = await query('SELECT * FROM participantes ORDER BY idParticipante');
-        res.status(200).json(result);
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Erro ao buscar Participantes' });
-      }
-  
+    } catch (error) {
+      console.error("Erro ao buscar participantes:", error.message);
+      res.status(500).json({ message: 'Erro ao buscar participantes', error });
     }
-
   } else if (req.method === 'POST') {
     const { nome, fone, email, mensagem } = req.body;
 
-    // Validação dos campos
-    if (!nome || !fone ) {
+    // Validação dos campos obrigatórios
+    if (!nome || !fone) {
       return res.status(400).json({ error: 'Existe Campo obrigatório NÃO Preenchido!' });
     }
 
     try {
-      const result = await query(
-        'INSERT INTO participantes (nome, fone, email, mensagem) VALUES (?, ?, ?, ?)',
-        [nome, fone, email, mensagem]
-      );
+      const { data, error } = await supabase
+        .from('participantes')
+        .insert([{ nome, fone, email, mensagem }]);
 
-      // Aqui estamos capturando o insertId, que é o ID gerado pelo MySQL
-      const id = result.insertId;
-      res.status(201).json({ success: true, id: id });
+      if (error) throw error;
+
+      res.status(201).json(data[0]);
     } catch (error) {
-      console.error(error);
+      console.error("Erro ao inserir participante:", error.message);
       res.status(500).json({ error: 'Erro ao inserir participante' });
     }
   } else {
-    res.status(405).json({ error: 'Método não permitido' });
+    res.status(405).json({ error: 'Método não permitido.' });
   }
 }
