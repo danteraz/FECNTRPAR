@@ -7,11 +7,11 @@ export default async function handler(req, res) {
     try {
       const { data, error } = await supabase
         .from('administradores')
-        .select('COUNT(*)');
+        .select('*', { count: 'exact' }); // Solicita a contagem exata de registros
 
       if (error) throw error;
 
-      res.status(200).json({ count: data[0].count });
+      res.status(200).json({ count }); // Retorna a contagem diretamente
     } catch (error) {
       console.error('Erro ao verificar administradores:', error);
       res.status(500).json({ error: 'Erro ao verificar administradores' });
