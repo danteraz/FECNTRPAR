@@ -4,7 +4,7 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 
 export default async function handler(req, res) {
   const { fone, idParticipante } = req.query;
-console.log(fone, idParticipante)
+
   try {
     // Busca o participante com o telefone informado
     let query = supabase

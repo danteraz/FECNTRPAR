@@ -4,7 +4,6 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 
 export default async function handler(req, res) {
 
-  console.log("ENTROU NO INDEX PARTICIPANTES?")
   if (req.method === 'GET') {
     const { excludePresenca } = req.query;
 
@@ -13,7 +12,7 @@ export default async function handler(req, res) {
       if (excludePresenca) {
         const excludeArray = JSON.parse(excludePresenca);
         const formattedArray = `(${excludeArray.join(',')})`; // Transforma [1,3] em "(1,3)"
-        console.log("excludeArray",formattedArray)
+
         // Verifique se excludeArray é um array válido
         if (!Array.isArray(excludeArray)) {
           throw new Error('excludePresenca deve ser um array');
@@ -24,17 +23,13 @@ export default async function handler(req, res) {
           .from('participantes')
           .select('*')
           .not('idParticipante', 'in', formattedArray);
-
-          console.log("response PARTICIPANTE",response)
   
         data = response.data;
       } else {
-        console.log("SEM CONFIRMADOS")
         // Se não há exclusão, selecione todos os participantes
         const response = await supabase
           .from('participantes')
           .select('*');
-          console.log("response PARTICIPANTE",response)
   
         data = response.data;
       }
@@ -75,7 +70,6 @@ export default async function handler(req, res) {
       }
         
     } catch (error) {
-      console.log("VOLTA PELO CATCH???")
       console.error("Erro ao inserir participante:", error.message);
       res.status(500).json({ error: 'Erro ao inserir participante' });
     }

@@ -7,8 +7,6 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     const { idPalestra } = req.query;
 
-    console.log("ENTROU NO INDEX PRESENCAS?",idPalestra)
-
     try {
       // Buscando os participantes confirmados na palestra
       const { data, error } = await supabase

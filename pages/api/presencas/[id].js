@@ -5,7 +5,7 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 export default async function handler(req, res) {
   const { id: idParticipante } = req.query; // O 'id' é obtido da rota dinâmica
   const { idPalestra } = req.query;
-    console.log("ENTROU NO ID PRESENCAS?",idParticipante,idPalestra)
+
   if (req.method === 'GET') {
     try {
       // Lista todos participantes de uma palestra
