@@ -4,7 +4,7 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 
 export default async function handler(req, res) {
   const { id } = req.query;
-  console.log("ENTROU NO ID PARTICIPNTES?", id)
+
   if (req.method === 'PUT') {
     const { nome, fone, email, mensagem } = req.body;
 

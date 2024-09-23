@@ -4,7 +4,6 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 
 export default async function handler(req, res) {
   
-  console.log("ENTROU NO INDEX PALESTRAS?")
   if (req.method === 'GET') {
     try {
       const { data, error } = await supabase

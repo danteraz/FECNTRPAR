@@ -62,8 +62,8 @@ export default function GeracaoQRCode() {
               //inputRef.current.focus();
             }, 3000);
         } else {
-          //const qrCodeLink = `http://localhost:3000/participante-qrcode?idPalestra=${id}`;
-          const qrCodeLink = `https://www.msn.com/pt-br/noticias/ciencia-e-tecnologia/al%C3%A9m-de-caminhada-espacial-quais-experimentos-s%C3%A3o-feitos-na-miss%C3%A3o-polaris-dawn/ar-AA1qwOth?ocid=msedgntp&pc=U531&cvid=096264e60e204540a21024f8807777bc&ei=15`;
+          const qrCodeLink = `https://fecntrpar.vercel.app/participante-qrcode?idPalestra=${id}`;
+          //const qrCodeLink = `https://www.msn.com/pt-br/noticias/ciencia-e-tecnologia/al%C3%A9m-de-caminhada-espacial-quais-experimentos-s%C3%A3o-feitos-na-miss%C3%A3o-polaris-dawn/ar-AA1qwOth?ocid=msedgntp&pc=U531&cvid=096264e60e204540a21024f8807777bc&ei=15`;
           setQrCodeUrl(qrCodeLink); // Gera o QRCode
           setIsPrintDisabled(false); // Habilita o botão de impressão
         }

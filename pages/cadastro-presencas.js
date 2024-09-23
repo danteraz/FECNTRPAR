@@ -100,7 +100,6 @@ export default function CadastroPresencas() {
       // Primeiro, obtenha os participantes que já confirmaram presença
       const responsePresenca = await fetch(`/api/presencas?idPalestra=${idPalestra}`);
       const presencaData = await responsePresenca.json();
-      console.log("presencaData",presencaData)
       if (!responsePresenca.ok || !Array.isArray(presencaData)) {
         console.error('Erro ao buscar presenças ou estrutura de dados inválida');
         return;
@@ -108,18 +107,15 @@ export default function CadastroPresencas() {
   
       // Extraia os ids dos participantes que já confirmaram presença
       const idsComPresenca = presencaData.map(p => p.idParticipante);
-      console.log("idsComPresenca",idsComPresenca)
   
       // Se idsComPresenca for um array válido e tiver algum valor, use-o, senão, não inclua no fetch
       const url = idsComPresenca.length > 0 
         ? `/api/participantes?excludePresenca=${JSON.stringify(idsComPresenca)}`
         : `/api/participantes`;
-        console.log("url",url)
   
       // Agora, obtenha os participantes
       const responseParticipantes = await fetch(url);
       const participantesData = await responseParticipantes.json();
-      console.log("participantesData",participantesData)
   
       if (responseParticipantes.ok && Array.isArray(participantesData)) {
         const sortedParticipantes = participantesData.sort((a, b) => a.nome.localeCompare(b.nome));
@@ -135,7 +131,6 @@ export default function CadastroPresencas() {
   const fetchConfirmados = async (id) => {
     const response = await fetch(`/api/presencas?idPalestra=${id}`);
     const data = await response.json();
-    console.log("RETORNOU DE INDEX PRESENÇA: ", data)
 
     const sortedConfirmados = data.sort((a, b) => a.nome.localeCompare(b.nome));
 

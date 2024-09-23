@@ -124,9 +124,6 @@ export default function CadastroParticipantes() {
       });
       const result = await response.json();
 
-      console.log("RETORNO RESPONSE ", response)
-      console.log("RETORNO RESULT ", result)
-
       if (response.status !== 200) {
           setOpcao(result.error || 'Erro ao processar a requisição');
 
