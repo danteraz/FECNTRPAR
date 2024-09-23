@@ -185,7 +185,7 @@ export default function ParticipanteQRCode() {
           setIdParticipante(novoParticipante.id);
     
           // Inscrever na palestra
-          inscreverParticipante(novoParticipante.id,idPalestra) 
+          inscreverParticipante(novoParticipante.idParticipante,idPalestra) 
 /*
           const responsePresenca = await fetch('/api/adicionarPresenca', {
             method: 'POST',
