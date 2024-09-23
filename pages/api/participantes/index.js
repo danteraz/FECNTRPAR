@@ -3,39 +3,48 @@ import { createClient } from '@supabase/supabase-js';
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 export default async function handler(req, res) {
+
+  console.log("ENTROU NO INDEX PARTICIPANTES?")
   if (req.method === 'GET') {
     const { excludePresenca } = req.query;
 
     try {
-      // Lista os participantes que não estão na palestra (excludePresenca)
+      let data;
       if (excludePresenca) {
-        const { data, error } = await supabase
-          .from('participantes')
-          .select('idParticipante, nome')
-          .not('idParticipante', 'in', supabase
-            .from('presencas')
-            .select('idParticipante')
-            .eq('idPalestra', excludePresenca)
-          );
-
-        if (error) throw error;
-
-        res.status(200).json(data);
-      } else {
-        // Lista todos os participantes
-        const { data, error } = await supabase
+        const excludeArray = JSON.parse(excludePresenca);
+        const formattedArray = `(${excludeArray.join(',')})`; // Transforma [1,3] em "(1,3)"
+        console.log("excludeArray",formattedArray)
+        // Verifique se excludeArray é um array válido
+        if (!Array.isArray(excludeArray)) {
+          throw new Error('excludePresenca deve ser um array');
+        }
+  
+        // Obtenha os participantes que não estão no excludeArray
+        const response = await supabase
           .from('participantes')
           .select('*')
-          .order('idParticipante', { ascending: true });
+          .not('idParticipante', 'in', formattedArray);
 
-        if (error) throw error;
-
-        res.status(200).json(data);
+          console.log("response PARTICIPANTE",response)
+  
+        data = response.data;
+      } else {
+        console.log("SEM CONFIRMADOS")
+        // Se não há exclusão, selecione todos os participantes
+        const response = await supabase
+          .from('participantes')
+          .select('*');
+          console.log("response PARTICIPANTE",response)
+  
+        data = response.data;
       }
+  
+      res.status(200).json(data);
     } catch (error) {
-      console.error("Erro ao buscar participantes:", error.message);
-      res.status(500).json({ message: 'Erro ao buscar participantes', error });
+      console.error('Erro ao buscar participantes:', error.message);
+      res.status(500).json({ error: 'Erro ao buscar participantes' });
     }
+
   } else if (req.method === 'POST') {
     const { nome, fone, email, mensagem } = req.body;
 
@@ -47,12 +56,26 @@ export default async function handler(req, res) {
     try {
       const { data, error } = await supabase
         .from('participantes')
-        .insert([{ nome, fone, email, mensagem }]);
+        .insert([
+          {
+            nome: nome,         
+            Fone: fone,         
+            email: email,       
+            mensagem: mensagem  
+          }
+        ])
+        .select(); // Isso garante que os dados inseridos (incluindo o id) sejam retornados
 
-      if (error) throw error;
-
-      res.status(201).json(data[0]);
+      if (error) {
+        return res.status(500).json({ error: 'Erro ao inserir participante' });
+      // Sucesso: Participante incluído
+      } else {
+        //res.status(200).json({ success: true });
+        return res.status(200).json({ success: true, idParticipante: data[0].idParticipante });
+      }
+        
     } catch (error) {
+      console.log("VOLTA PELO CATCH???")
       console.error("Erro ao inserir participante:", error.message);
       res.status(500).json({ error: 'Erro ao inserir participante' });
     }

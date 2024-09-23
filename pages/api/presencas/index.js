@@ -3,26 +3,39 @@ import { createClient } from '@supabase/supabase-js';
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
 export default async function handler(req, res) {
-  const { idPalestra } = req.query;
 
   if (req.method === 'GET') {
+    const { idPalestra } = req.query;
+
+    console.log("ENTROU NO INDEX PRESENCAS?",idPalestra)
+
     try {
-      // Join entre as tabelas presencas e participantes
+      // Buscando os participantes confirmados na palestra
       const { data, error } = await supabase
         .from('presencas')
-        .select('idParticipante, sorteado, presente, participantes (nome, fone)')
+        .select(`
+          idParticipante,presente,
+          participantes (nome, Fone)
+        `)
         .eq('idPalestra', idPalestra);
-
-      if (error) throw error;
-
-      if (data.length === 0) {
-        console.warn('Nenhuma Presença encontrada');
+  
+      if (error) {
+        throw error;
       }
-
-      res.status(200).json(data);
+  
+      // Formatando os dados para incluir os campos concatenados
+      const confirmados = data.map((presenca) => ({
+        idParticipante: presenca.idParticipante,
+        nome: presenca.participantes.nome,
+        fone: presenca.participantes.Fone,
+        presente: presenca.presente
+      }));
+      //display: `${presenca.idParticipante} - ${presenca.participantes.nome} - ${presenca.participantes.Fone}`
+  
+      res.status(200).json(confirmados);
     } catch (error) {
-      console.error("Erro ao buscar presenças:", error.message);
-      res.status(500).json({ message: 'Erro ao buscar presenças', error });
+      console.error('Erro ao buscar presenças:', error.message);
+      res.status(500).json({ error: 'Erro ao buscar presenças' });
     }
   } else if (req.method === 'POST') {
     const { idPalestra, idParticipante } = req.body;

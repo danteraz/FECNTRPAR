@@ -60,9 +60,8 @@ export default function Login() {
     });
 
     const data = await response.json();
-
     //if (response.ok && data.exists) {
-    if (response.status === 400) {
+    if (response.status === 400 && data.error === 'Já existe um administrador com este Usuário!') {
       router.push(`/esqueci-senha?usuario=${usuario}`);
     } else {
       setMensagem('Usuário Não Cadastrado');

@@ -14,11 +14,12 @@ export default async function handler(req, res) {
       // Inserindo nova presença
       const { error } = await supabase
         .from('presencas')
-        .insert([{ idPalestra, idParticipante }]);
+        .insert([{ idPalestra: idPalestra, idParticipante: idParticipante, presente: 1 }]);
 
       if (error) throw error;
 
       // INNER JOIN entre participantes e presencas para obter o participante confirmado
+      /*
       const { data: confirmados, error: errorConfirmados } = await supabase
         .from('presencas')
         .select('participantes(idParticipante, nome)')
@@ -26,8 +27,9 @@ export default async function handler(req, res) {
         .join('participantes', 'participantes.idParticipante', 'presencas.idParticipante');
 
       if (errorConfirmados) throw errorConfirmados;
-
-      res.status(200).json(confirmados);
+      */
+    
+      res.status(200).json({ success: true });
     } catch (error) {
       console.error('Erro ao adicionar presença:', error.message);
       res.status(500).json({ message: 'Erro ao adicionar presença', error });

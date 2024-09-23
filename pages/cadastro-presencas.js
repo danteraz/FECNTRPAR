@@ -29,6 +29,18 @@ export default function CadastroPresencas() {
   }, [])
 
   const LerPalestra = () => {
+    
+    //  Limpar os dados da tela ao sair do input da Palestra
+    setMensagem(' ');
+    setParticipantes('')
+    setConfirmados('')
+    setDataPalestra('');
+    setHora('');
+    setTitulo('');
+    setAssunto('');
+    setLocalPalestra('');
+
+    //  Obtem Palestra
     if (idPalestra) {
       fetchPalestra(idPalestra);  // Executa a função apenas quando o campo perde o foco
     }
@@ -49,11 +61,6 @@ export default function CadastroPresencas() {
             disableListbox(true); // Desabilita a navegação para manutenção dos participantes
             setMensagem('Esta Palastra Já Ocorreu e Será apenas Visualizada.');
 
-            // Limpa a mensagem após 3 segundos
-            setTimeout(() => {
-              setMensagem(' ');
-              //inputRef.current.focus();
-            }, 3000);
         } else {
             disableListbox(false); // Habilita as ações se a palestra não ocorreu ainda
         }
@@ -88,18 +95,47 @@ export default function CadastroPresencas() {
     }
   };
 
-  const fetchParticipantes = async (id) => {
-      const response = await fetch(`/api/participantes?excludePresenca=${id}`);
-      const data = await response.json();
-      
-      const sortedParticipantes = data.sort((a, b) => a.nome.localeCompare(b.nome));
+  const fetchParticipantes = async (idPalestra) => {
+    try {
+      // Primeiro, obtenha os participantes que já confirmaram presença
+      const responsePresenca = await fetch(`/api/presencas?idPalestra=${idPalestra}`);
+      const presencaData = await responsePresenca.json();
+      console.log("presencaData",presencaData)
+      if (!responsePresenca.ok || !Array.isArray(presencaData)) {
+        console.error('Erro ao buscar presenças ou estrutura de dados inválida');
+        return;
+      }
   
-      setParticipantes(sortedParticipantes); // Define o estado com os participantes
+      // Extraia os ids dos participantes que já confirmaram presença
+      const idsComPresenca = presencaData.map(p => p.idParticipante);
+      console.log("idsComPresenca",idsComPresenca)
+  
+      // Se idsComPresenca for um array válido e tiver algum valor, use-o, senão, não inclua no fetch
+      const url = idsComPresenca.length > 0 
+        ? `/api/participantes?excludePresenca=${JSON.stringify(idsComPresenca)}`
+        : `/api/participantes`;
+        console.log("url",url)
+  
+      // Agora, obtenha os participantes
+      const responseParticipantes = await fetch(url);
+      const participantesData = await responseParticipantes.json();
+      console.log("participantesData",participantesData)
+  
+      if (responseParticipantes.ok && Array.isArray(participantesData)) {
+        const sortedParticipantes = participantesData.sort((a, b) => a.nome.localeCompare(b.nome));
+        setParticipantes(sortedParticipantes);
+      } else {
+        console.error('Erro ao buscar participantes ou estrutura de dados inválida');
+      }
+    } catch (error) {
+      console.error('Erro ao buscar participantes:', error);
+    }
   };
-  
+    
   const fetchConfirmados = async (id) => {
     const response = await fetch(`/api/presencas?idPalestra=${id}`);
     const data = await response.json();
+    console.log("RETORNOU DE INDEX PRESENÇA: ", data)
 
     const sortedConfirmados = data.sort((a, b) => a.nome.localeCompare(b.nome));
 
@@ -122,7 +158,7 @@ export default function CadastroPresencas() {
       if (response.ok) {
         // Atualize a lista de confirmados após a inserção bem-sucedida
         const data = await response.json();
-        setConfirmados(data); // Atualiza a lista de confirmados com a resposta do backend
+        //setConfirmados(data); // Atualiza a lista de confirmados com a resposta do backend
         
         fetchParticipantes(idPalestra); // Atualiza os participantes
         fetchConfirmados(idPalestra);   // Atualiza os confirmados  
@@ -310,7 +346,7 @@ export default function CadastroPresencas() {
                     onClick={() => !isListDisabled && removerPresenca(conf.idParticipante)} // Só permite clique se isListDisabled for false
                     className={`cursor-pointer hover:bg-gray-200 px-2 py-1 ${isListDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}        
                   >
-                    {conf.idParticipante} - {conf.nome}
+                    {conf.idParticipante} - {conf.nome} - {`(${conf.fone.slice(0, 2)}) ${conf.fone.slice(2, 7)}-${conf.fone.slice(7)}`}
                     {conf.presente === 1 && <span> ✔️</span>} {/* Exibe o símbolo "marcado" */}
                   </li>
                 ))}

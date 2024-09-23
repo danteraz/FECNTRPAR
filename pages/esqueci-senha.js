@@ -28,7 +28,8 @@ export default function EsqueciSenha() {
       body: JSON.stringify({ usuario, senha: novaSenha }),
     });
     const data = await response.json();
-    if (response.ok) {
+
+    if (response.status === 200) {
       setMensagem('Senha Alterada Com Sucesso');
       setTimeout(() => {
         router.push('/login');

@@ -1,44 +1,63 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 
-export default function CadastroAdministradores() {
+const CadastroAdministradores = () => {
   const router = useRouter();
   const [opcao, setOpcao] = useState('                              ');
 
   //  Dados de Paginação Listbox
-  const [administradores, setAdministradores] = useState([]);
   const [nome, setNome] = useState('');
   const [fone, setFone] = useState('');
   const [email, setEmail] = useState('');
   const [usuario, setUsuario] = useState('');
   const [mensagem, setMensagem] = useState('          ');
-  //const [senha, setSenha] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
+  const [administradores, setAdministradores] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
-  const [isNavDisabled, setIsNavDisabled] = useState(false);
-  const [isImpDisabled, setIsImpDisabled] = useState(true);
 
   //  Dados de Controle de habilitar/Desabilitar Elementos da Tela
+  const [isEditing, setIsEditing] = useState(false);
+
+  //  Dados de Paginação Listbox
+  const [isNavDisabled, setIsNavDisabled] = useState(false);
+  const [isImpDisabled, setIsImpDisabled] = useState(true);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 4;
 
+  const fillInputs = useCallback((id) => {
+    const admin = administradores.find((admin) => admin.idAdministrador === id);
+    if (admin) {
+      setNome(admin.nome);
+      setFone(formatPhoneNumber(admin.Fone));
+      setEmail(admin.email);
+      setUsuario(admin.usuario);
+
+      // Inicializa o campo "mensagem" com o valor correspondente
+      const mensagemTexto = admin.mensagem === 1 ? '1' :
+                            admin.mensagem === 2 ? '2' :
+                            admin.mensagem === 3 ? '3' : '          ';
+      setMensagem(mensagemTexto);
+    }
+  }, [administradores]);
+
   useEffect(() => {
-    async function fetchAdministradores() {
+    const fetchAdministradores = async () => {
       const res = await fetch('/api/administradores');
       const data = await res.json();
       setAdministradores(data);
-
+  
       // Selecionar a primeira linha automaticamente
       if (data.length > 0) {
         setSelectedId(data[0].idAdministrador);
-        fillInputs(data[0].idAdministrador);
+        fillInputs(data[0].idAdministrador); // Apenas preenche os inputs
       }
-    }
+    };
+    
     fetchAdministradores();
-  }, [fillInputs]);
+    // Remove `fillInputs` das dependências para evitar o loop
+  }, []); // Agora será executado apenas uma vez
 
   const handleFocus = () => {
     setFone(fone.replace(/\D/g, ''));
@@ -186,23 +205,6 @@ export default function CadastroAdministradores() {
 
   const handleSair = () => {
     router.push('/login');
-  };
-
-  const fillInputs = async (id) => {
-    const admin = administradores.find((admin) => admin.idAdministrador === id);
-    if (admin) {
-      setNome(admin.nome);
-      setFone(formatPhoneNumber(admin.Fone));
-      setEmail(admin.email);
-      setUsuario(admin.usuario);
-
-      // Inicializa o campo "mensagem" com o valor correspondente
-      const mensagemTexto = admin.mensagem === 1 ? '1' :
-                            admin.mensagem === 2 ? '2' :
-                            admin.mensagem === 3 ? '3' : '          ';
-      setMensagem(mensagemTexto);
-      //setSenha(admin.Senha);
-    }
   };
 
   const resetInputs = () => {
@@ -415,3 +417,6 @@ export default function CadastroAdministradores() {
     </div>
   );
 }
+
+// Exportação do componente no final do arquivo
+export default CadastroAdministradores;
