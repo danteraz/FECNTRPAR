@@ -48,9 +48,20 @@ export default function GeracaoQRCode() {
         setPreviousIdPalestra(idPalestra); //Guarda o ID Atual para recuperar se for digitado um ID inválido
 
         // A dataPalestra já vem no formato ISO completo
-        const dataHoraPalestra = new Date(DadosPalestra.dataPalestra); // Use apenas a data completa vinda do banco
-        const now = new Date();
-        if (dataHoraPalestra < now) {
+        const dataHoraPalestra = DadosPalestra.dataPalestra; // Use apenas a data completa vinda do banco
+console.log("dataHoraPalestra",dataHoraPalestra);
+        const dateParts = dataHoraPalestra.split('-'); // ['2024', '09', '23']
+        const DtosPalestra = `${dateParts[0]}${dateParts[1]}${dateParts[2]}`; // 23/09/2024
+        console.log("DtosPalestra",DtosPalestra);
+
+        const hoje = new Date(); 
+        const ano = hoje.getFullYear();
+        const mes = String(hoje.getMonth() + 1).padStart(2, '0'); // O mês começa em 0, por isso é necessário somar 1
+        const dia = String(hoje.getDate()).padStart(2, '0');
+        
+        // Montar a data no formato YYYYMMDD
+        const DtosHoje = `${ano}${mes}${dia}`;
+        if (DtosPalestra < DtosHoje) {
             disableListbox(true); // Desabilita a navegação para manutenção dos participantes
             setMensagem('Esta Palastra Já Ocorreu e Será apenas Visualizada.');
             setQrCodeUrl(''); // Não gera o QRCode se a palestra já ocorreu
@@ -68,7 +79,9 @@ export default function GeracaoQRCode() {
           setIsPrintDisabled(false); // Habilita o botão de impressão
         }
 
-        const formattedDate = new Date(DadosPalestra.dataPalestra).toLocaleDateString('pt-BR')
+        //const formattedDate = new Date(DadosPalestra.dataPalestra).toLocaleDateString('pt-BR')
+        //const formattedDate = new Date(DadosPalestra.dataPalestra).toLocaleDateString('pt-BR')
+        const formattedDate = new Date(DadosPalestra.dataPalestra).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
         setDataPalestra(formattedDate);
         setHora(DadosPalestra.hora.slice(0, 5));
         setTitulo(DadosPalestra.titulo);

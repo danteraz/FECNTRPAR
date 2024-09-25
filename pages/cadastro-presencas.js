@@ -76,7 +76,8 @@ export default function CadastroPresencas() {
         }
 
         //const dateParts = DadosPalestra.dataPalestra.split('-'); // ['2024', '09', '23']
-        const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`; // 23/09/2024
+        //const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`; // 23/09/2024
+        const formattedDate = new Date(DadosPalestra.dataPalestra).toLocaleDateString('pt-BR', { timeZone: 'UTC' })
         setDataPalestra(formattedDate);
         setHora(DadosPalestra.hora.slice(0, 5));
         setTitulo(DadosPalestra.titulo);

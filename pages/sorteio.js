@@ -72,7 +72,6 @@ export default function Sorteio() {
         }
         
         // A dataPalestra já vem no formato ISO completo
-        // A dataPalestra já vem no formato ISO completo
         const dataHoraPalestra = DadosPalestra.dataPalestra; // Use apenas a data completa vinda do banco
         const dateParts = dataHoraPalestra.split('-'); // ['2024', '09', '23']
         const DtosPalestra = `${dateParts[0]}${dateParts[1]}${dateParts[2]}`; // 23/09/2024
