@@ -12,8 +12,8 @@ export default async function handler(req, res) {
       const { data, error } = await supabase
         .from('presencas')
         .select(`
-          idParticipante,presente,
-          participantes (nome, Fone)
+          idParticipante,presente,sorteado,
+          participantes (nome, matricula)
         `)
         .eq('idPalestra', idPalestra);
   
@@ -25,8 +25,9 @@ export default async function handler(req, res) {
       const confirmados = data.map((presenca) => ({
         idParticipante: presenca.idParticipante,
         nome: presenca.participantes.nome,
-        fone: presenca.participantes.Fone,
-        presente: presenca.presente
+        matricula: presenca.participantes.matricula,
+        presente: presenca.presente,
+        sorteado: presenca.sorteado
       }));
       //display: `${presenca.idParticipante} - ${presenca.participantes.nome} - ${presenca.participantes.Fone}`
   

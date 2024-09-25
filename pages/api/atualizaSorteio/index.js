@@ -4,7 +4,7 @@ const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { idPalestra, idParticipanteSorteado } = req.body;
+    const { idPalestra } = req.body;
 
     try {
       const { error: errorPalestra } = await supabase
@@ -13,14 +13,6 @@ export default async function handler(req, res) {
         .eq('idPalestra', idPalestra);
 
       if (errorPalestra) throw errorPalestra;
-
-      const { error: errorPresenca } = await supabase
-        .from('presencas')
-        .update({ sorteado: 1 })
-        .eq('idParticipante', idParticipanteSorteado)
-        .eq('idPalestra', idPalestra);
-
-      if (errorPresenca) throw errorPresenca;
 
       res.status(200).json({ message: 'Sorteio atualizado com sucesso!' });
     } catch (error) {

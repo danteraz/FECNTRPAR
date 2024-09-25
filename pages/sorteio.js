@@ -21,6 +21,10 @@ export default function Sorteio() {
   const [isNavDisabled, setIsNavDisabled] = useState(false);
   const [isSortearDisable, setisSortearDisable] = useState(false);
 
+  const [QtdParticipantes, setQtdParticipantes] = useState(0)
+  const [Brinde, setBrinde] = useState('')
+  const [QtdBrinde, setQtdBrinde] = useState(0)
+
   //  COLOCAR O INPUT DE IDPALESTRA EM FOCO
   const inputRef = useRef(null);  // Criando uma referência ao input
 
@@ -49,33 +53,56 @@ export default function Sorteio() {
     try {
       const response = await fetch(`/api/palestras/${id}`);
       const DadosPalestra = await response.json();
-  
+
       if (DadosPalestra.idPalestra) {
 
         // Já houve Sorteio para Esta Palastra.
-        if (DadosPalestra.sorteio) {
+        if (DadosPalestra.sorteio === 1) {
           setpalestraSorteada(DadosPalestra.sorteio);
           DisableSortear(true); // Desabilita a navegação para manutenção dos participantes
-          setMensagem('Já houve Sorteio para Esta Palastra.');
-
+          setMensagem('Sorteio ENCERRADO para Esta Palastra.');
           // Limpa a mensagem após 3 segundos
           setTimeout(() => {
             setMensagem(' ');
           }, 3000);
 
         } else {
+          setMensagem('');
+          DisableSortear(false); // Habilita as ações se a palestra não ocorreu ainda
+        }
+        
+        // A dataPalestra já vem no formato ISO completo
+        // A dataPalestra já vem no formato ISO completo
+        const dataHoraPalestra = DadosPalestra.dataPalestra; // Use apenas a data completa vinda do banco
+        const dateParts = dataHoraPalestra.split('-'); // ['2024', '09', '23']
+        const DtosPalestra = `${dateParts[0]}${dateParts[1]}${dateParts[2]}`; // 23/09/2024
+
+        const hoje = new Date(); 
+        const ano = hoje.getFullYear();
+        const mes = String(hoje.getMonth() + 1).padStart(2, '0'); // O mês começa em 0, por isso é necessário somar 1
+        const dia = String(hoje.getDate()).padStart(2, '0');
+        
+        // Montar a data no formato YYYYMMDD
+        const DtosHoje = `${ano}${mes}${dia}`;
+        if (DtosPalestra > DtosHoje) {
+            setpalestraSorteada(DadosPalestra.sorteio);
+            DisableSortear(true); // Desabilita a navegação para manutenção dos participantes
+            setMensagem('Esta Palestra Ainda Vai Ser Realizada.');
+
+        } else if (DadosPalestra.sorteio !== 1) { 
+            setMensagem('');
             DisableSortear(false); // Habilita as ações se a palestra não ocorreu ainda
         }
 
-        const formattedDate = new Date(DadosPalestra.dataPalestra).toLocaleDateString('pt-BR')
+        const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`; // 23/09/2024
         setDataPalestra(formattedDate);
         setHora(DadosPalestra.hora.slice(0, 5));
         setTitulo(DadosPalestra.titulo);
         setAssunto(DadosPalestra.assunto);
         setLocalPalestra(DadosPalestra.localPalestra);
 
-        //  Popula o listbox de Confirmados para o sorteio
-        fetchConfirmados(id);
+        //  Popula o listbox de Participantes para o sorteio
+        fetchParticipantes(id);
 
       } else {
 
@@ -98,19 +125,47 @@ export default function Sorteio() {
     }
   };
 
-  const fetchConfirmados = async (id) => {
-    const response = await fetch(`/api/presencas?idPalestra=${id}`);
-    const data = await response.json();
-    const sortedConfirmados = data.sort((a, b) => a.nome.localeCompare(b.nome));
+  const fetchParticipantes = async (idPalestra) => {
+    try {
+      // Primeiro, obtenha os participantes que participaram da palestra
+      const responsePresenca = await fetch(`/api/presencas?idPalestra=${idPalestra}`);
+      const presencaData = await responsePresenca.json();
+      if (!responsePresenca.ok || !Array.isArray(presencaData)) {
+        console.error('Erro ao buscar presenças ou estrutura de dados inválida');
+        return;
+      }
 
-    setConfirmados(sortedConfirmados);
+      // Guarda os ids dos participantes da palestra que NÃO FORAM sorteados
+      const idsNaoSorteados = presencaData
+        .filter(p => p.sorteado === '')  // Filtra apenas os participantes NÃO sorteados
+        .map(p => ({
+          idParticipante: p.idParticipante,
+          nome: p.nome,
+          matricula: p.matricula,
+          presente: p.presente
+        }));        
 
-    //  Pega o participantes sorteado para colocar no listbox de sorteado
-    const participanteSorteado = sortedConfirmados.find(part => part.sorteado === 1);
-    if (participanteSorteado) {
-      setSorteados([participanteSorteado]);
+      // Guarda os ids dos participantes da palestra que FORAM sorteados
+      const idsSorteados = presencaData
+        .filter(p => p.sorteado !== '')  // Filtra apenas os participantes NÃO sorteados
+        .map(p => ({
+          idParticipante: p.idParticipante,
+          nome: p.nome,
+          matricula: p.matricula,
+          brinde: p.sorteado
+        }));        
+      
+      // Popula os listboxes Classificados por Nome
+      const sortedNaoSorteados = idsNaoSorteados.sort((a, b) => a.nome.localeCompare(b.nome));
+      const sortedSorteados = idsSorteados.sort((a, b) => a.nome.localeCompare(b.nome));
+
+      setConfirmados(sortedNaoSorteados);
+      setSorteados(sortedSorteados);
+      setQtdParticipantes(idsNaoSorteados.length)
+
+    } catch (error) {
+      console.error('Erro ao buscar participantes:', error);
     }
-    
   };
 
   const DisableSortear = (status) => {
@@ -127,7 +182,7 @@ export default function Sorteio() {
 
   const ExecutaSorteio = async () => {
     // Verifica se há confirmados para sortear
-    if (confirmados.length === 0) {
+    if (QtdParticipantes === 0) {
       setMensagem('Não há participantes confirmados para o sorteio.');
 
       // Limpa a mensagem após 3 segundos
@@ -136,46 +191,90 @@ export default function Sorteio() {
       }, 3000);
 
       return;
+    } else if (QtdBrinde > QtdParticipantes) {
+      setMensagem('Qtd Brinde MAIOR Que Participantes.');
+
+      // Limpa a mensagem após 3 segundos
+      setTimeout(() => {
+        setMensagem(' ');
+      }, 3000);
+      
+      return;      
     }
 
     // Gera um índice aleatório baseado no número de confirmados
-    const indiceSorteado = Math.floor(Math.random() * confirmados.length);
-
-    // Pega o participante sorteado
-    const participanteSorteado = confirmados[indiceSorteado];
-    DisableSortear(true); // Desabilita a navegação para manutenção dos participantes
-
-    // Atualiza o listbox de sorteados
-    setSorteados([participanteSorteado]);
-    setpalestraSorteada(idPalestra);
-
-    // Atualiza a Palestra e o participante como sorteados
-    try {
-      // Chamar a API para atualizar as tabelas 'palestras' e 'presencas'
-      const response = await fetch('/api/atualizaSorteio', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          idPalestra: idPalestra, // ID da palestra atual
-          idParticipanteSorteado: participanteSorteado.idParticipante, // ID do participante sorteado
-        }),
+    const sorteadosLocal = [];
+    const novosConfirmados = [...confirmados]; // Clona o array para não modificar diretamente
+  
+    for (let i = 0; i < QtdBrinde; i++) {
+      const indiceAleatorio = Math.floor(Math.random() * novosConfirmados.length);
+      const sorteado = novosConfirmados[indiceAleatorio];
+  
+      // Adiciona o participante sorteado ao array de sorteados
+      sorteadosLocal.push({
+        idParticipante: sorteado.idParticipante,
+        nome: sorteado.nome,
+        fone: sorteado.fone,
+        brinde: Brinde
       });
   
-      if (response.ok) {
-        //const data = await response.json();
-
-      } else {
-        const error = await response.json();
-        console.error('Erro ao atualizar o sorteio:', error.message);
-      }
-    } catch (error) {
-      console.error('Erro ao chamar a API de sorteio:', error);
+      // Remove o sorteado dos confirmados
+      novosConfirmados.splice(indiceAleatorio, 1);
     }
+  
+    // Atualiza os estados
+    setSorteados([...sorteados, ...sorteadosLocal]); // Adiciona os novos sorteados ao array
+    setConfirmados(novosConfirmados); // Atualiza a lista de confirmados removendo os sorteados
+    setQtdParticipantes(novosConfirmados.length)
 
   };
 
+  //  ENCERRA SORTEIO
+  const EncerraSorteio = async () => {
+    // Atualiza a Palestra e o participante como sorteados
+    if (idPalestra) {
+      try {
+        // Chamar a API para atualizar as tabelas 'palestras' e 'presencas'
+        const response = await fetch('/api/atualizaSorteio', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            idPalestra: idPalestra // ID da palestra atual
+          }),
+        });
+    
+        if (!response.ok) {
+          const error = await response.json();
+          console.error('Erro ao atualizar o sorteio:', error.message);
+        }
+        DisableSortear(true); // Desabilita a navegação para sorteio
+
+        //  Atualiza os sorteados da palestra
+        const responseSorteado = await fetch('/api/atualizaSorteados', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            idPalestra: idPalestra,  // O id da palestra que está sorteando
+            sorteados: sorteados     // O array com os participantes sorteados e o brinde
+          }),
+        });
+    
+        if (!response.ok) {
+          console.error('Erro ao atualizar Sorteados:', await response.json());
+        }
+
+      } catch (error) {
+        console.error('Erro ao chamar a API de sorteio:', error);
+      }
+
+    }
+  }
+
+  // EXIBE A TELA
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100">
       <div className="grid w-full h-full max-w-full max-h-full bg-white rounded shadow-md p-4"
@@ -258,8 +357,8 @@ export default function Sorteio() {
           </button>
         </div>
 
-        {/* C22: Área de Cadastro de Presenças */}
-        <div className="relative flex flex-col border border-black rounded-lg p-2 space-y-2">
+        {/* C22: Área de Cadastro de Sorteio */}
+        <div className="relative flex flex-col border border-black rounded-lg p-2 space-y-0">
           <h2 className="text-xl font-bold text-center">SORTEIO</h2>
           <hr className="border-t-2 border-black w-full mb-4" />
 
@@ -297,6 +396,37 @@ export default function Sorteio() {
             <span>{localPalestra}</span>
           </div>
 
+          <div className="relative flex flex-col border border-black rounded-lg p-2 space-y-0.5">
+            <div className="flex items-center">
+              <label className="mr-2"><strong>Confirmados:</strong></label>
+              <span>{QtdParticipantes}</span>
+              
+              <label className="ml-10 mr-2"><strong>Brinde:</strong></label>
+              <input type="text"
+                value={Brinde}
+                onChange={(e) => setBrinde(e.target.value)}
+                disabled = {isSortearDisable}
+                className="border border-gray-800 p-0 pl-2 rounded"
+              />
+              
+              <label className="ml-10 mr-2"><strong>Quantidade:</strong></label>
+              <input type="number"
+                value={QtdBrinde}
+                onChange={(e) => setQtdBrinde(e.target.value)}
+                disabled = {isSortearDisable}
+                className="border border-gray-800 p-0 pl-2 rounded w-20"
+              />
+              <button
+                type="button"
+                onClick={ExecutaSorteio}
+                className={"ml-9 py-1 px-4 rounded bg-green-500" }
+                disabled={isSortearDisable}
+              >
+                <strong>SORTEAR</strong>
+              </button>
+            </div>
+          </div>
+
           <div className="flex justify-between">
 
             {/* Listbox de Confirmados */}
@@ -323,20 +453,20 @@ export default function Sorteio() {
                     key={sorte.idParticipante} 
                     className={`cursor-pointer hover:bg-gray-200 px-2 py-1 ${isSortearDisable ? 'opacity-50 cursor-not-allowed' : ''}`}        
                   >
-                    {sorte.nome} - {`(${sorte.fone.slice(0, 2)}) ${sorte.fone.slice(2, 7)}-${sorte.fone.slice(7)}`}
+                    {sorte.nome} - {sorte.matricula} - <strong>{sorte.brinde}</strong>
                   </li>
                 ))}
               </ul>
             </div>
           </div>
           <button
-              type="button"
-              onClick={ExecutaSorteio}
-              className={`py-1 px-4 rounded bg-green-500` }
-              disabled={isSortearDisable}
-            >
-              <strong>SORTEAR</strong>
-            </button>
+            type="button"
+            onClick={EncerraSorteio}
+            className={`py-1 px-4 rounded bg-red-500` }
+            disabled={isSortearDisable}
+          >
+            <strong>ENCERRAR SORTEIO</strong>
+          </button>
         </div>
       </div>
     </div>

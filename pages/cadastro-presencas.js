@@ -55,9 +55,19 @@ export default function CadastroPresencas() {
         setPreviousIdPalestra(idPalestra); //Guarda o ID Atual para recuperar se for digitado um ID inválido
 
         // A dataPalestra já vem no formato ISO completo
-        const dataHoraPalestra = new Date(DadosPalestra.dataPalestra); // Use apenas a data completa vinda do banco
-        const now = new Date();
-        if (dataHoraPalestra < now) {
+        const dataHoraPalestra = DadosPalestra.dataPalestra; // Use apenas a data completa vinda do banco
+        const dateParts = dataHoraPalestra.split('-'); // ['2024', '09', '23']
+        const DtosPalestra = `${dateParts[0]}${dateParts[1]}${dateParts[2]}`; // 23/09/2024
+
+        const hoje = new Date(); 
+        const ano = hoje.getFullYear();
+        const mes = String(hoje.getMonth() + 1).padStart(2, '0'); // O mês começa em 0, por isso é necessário somar 1
+        const dia = String(hoje.getDate()).padStart(2, '0');
+        
+        // Montar a data no formato YYYYMMDD
+        const DtosHoje = `${ano}${mes}${dia}`;
+
+        if (DtosPalestra < DtosHoje) {
             disableListbox(true); // Desabilita a navegação para manutenção dos participantes
             setMensagem('Esta Palastra Já Ocorreu e Será apenas Visualizada.');
 
@@ -65,7 +75,8 @@ export default function CadastroPresencas() {
             disableListbox(false); // Habilita as ações se a palestra não ocorreu ainda
         }
 
-        const formattedDate = new Date(DadosPalestra.dataPalestra).toLocaleDateString('pt-BR')
+        //const dateParts = DadosPalestra.dataPalestra.split('-'); // ['2024', '09', '23']
+        const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`; // 23/09/2024
         setDataPalestra(formattedDate);
         setHora(DadosPalestra.hora.slice(0, 5));
         setTitulo(DadosPalestra.titulo);
@@ -146,7 +157,7 @@ export default function CadastroPresencas() {
         },
         body: JSON.stringify({
           idPalestra: idPalestra,
-          idParticipante: idParticipante,
+          idParticipante: idParticipante
         }),
       });
   
@@ -325,7 +336,7 @@ export default function CadastroPresencas() {
                     className={`cursor-pointer hover:bg-gray-200 px-2 py-1 ${isListDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         
                   >
-                    {part.idParticipante} - {part.nome}
+                    {part.nome} - {part.matricula}
                   </li>
                 ))}
               </ul>
@@ -341,7 +352,7 @@ export default function CadastroPresencas() {
                     onClick={() => !isListDisabled && removerPresenca(conf.idParticipante)} // Só permite clique se isListDisabled for false
                     className={`cursor-pointer hover:bg-gray-200 px-2 py-1 ${isListDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}        
                   >
-                    {conf.idParticipante} - {conf.nome} - {`(${conf.fone.slice(0, 2)}) ${conf.fone.slice(2, 7)}-${conf.fone.slice(7)}`}
+                    {conf.nome} - {conf.matricula}
                     {conf.presente === 1 && <span> ✔️</span>} {/* Exibe o símbolo "marcado" */}
                   </li>
                 ))}

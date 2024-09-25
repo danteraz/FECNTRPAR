@@ -41,10 +41,10 @@ export default async function handler(req, res) {
     }
 
   } else if (req.method === 'POST') {
-    const { nome, fone, email, mensagem } = req.body;
+    const { nome, matricula, empresa, setor, fone, email, mensagem } = req.body;
 
     // Validação dos campos obrigatórios
-    if (!nome || !fone) {
+    if (!nome || !matricula || !empresa || (empresa === "1" && setor === '')) {
       return res.status(400).json({ error: 'Existe Campo obrigatório NÃO Preenchido!' });
     }
 
@@ -53,7 +53,10 @@ export default async function handler(req, res) {
         .from('participantes')
         .insert([
           {
-            nome: nome,         
+            nome: nome,
+            matricula: matricula,
+            empresa: empresa,
+            setor: setor,
             Fone: fone,         
             email: email,       
             mensagem: mensagem  

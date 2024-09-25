@@ -17,12 +17,15 @@ export default function ParticipanteQRCode() {
   const [isInputDisabled, setInputDisabled] = useState(false);
 
   //  Dados de Inputs do Participante
-  const [nome, setNome] = useState('');
-  const [fone, setFone] = useState('');
-  const [email, setEmail] = useState('');
-  const [mensagem, setMensagem] = useState('');
   const [idParticipante, setIdParticipante] = useState(null); // Guardar o idParticipante quando encontrado
   const [statusInscricao, setStatusInscricao] = useState(''); // Para exibir a mensagem de inscrição no botão
+  const [nome, setNome] = useState('');
+  const [matricula, setMatricula] = useState('');
+  const [empresa, setEmpresa] = useState('');
+  const [setor, setSetor] = useState('');
+  const [fone, setFone] = useState('');
+  const [email, setEmail] = useState('');
+  const [mensagem, setMensagem] = useState('          ');
 
   const [MostraBotao, setMostraBotao] = useState('');
 
@@ -66,7 +69,7 @@ export default function ParticipanteQRCode() {
           setInputDisabled(true); // Desabilita a navegação para manutenção dos participantes
           setMostraBotao('')
         } else {
-          setInputDisabled(''); // Habilita a Entrada do Participante se a palestra não ocorreu ainda
+          setInputDisabled(false); // Habilita a Entrada do Participante se a palestra não ocorreu ainda
           setMostraBotao('')
         }
 
@@ -89,24 +92,30 @@ export default function ParticipanteQRCode() {
     }
   };
 
-  //  Pesquisa o Participante pelo Fone ao Sair do INPUT se já Cadastrado
+  //  Pesquisa o Participante pela Matrícula ao Sair do INPUT se já Cadastrado
   const fetchParticipantes = async () => {
     setIdParticipante(null);
     setNome('');
+    //setMatricula('');
+    setEmpresa('');
+    setSetor('');
+    setFone('');
     setEmail('');
     setMensagem('');
 
-    // Verificar se o telefone já está cadastrado
+    // Verificar se a Matrícula já está cadastrada
     try {
-      const response = await fetch(`/api/auth/check-fone-participante?fone=${fone}`);
+      const response = await fetch(`/api/auth/check-fone-participante?matricula=${matricula}`);
       const participante = await response.json();
       
       if (response.status === 400) {
         setIdParticipante(participante.idParticipante);
+        setMatricula(participante.matricula);
+        setEmpresa(participante.empresa);
+        setSetor(participante.setor);
         setNome(participante.nome);
         setEmail(participante.email);
-        setMensagem(participante.mensagem);
-
+  
         // Verificar se o participante está inscrito na palestra
         verificarInscricao(participante.idParticipante);
       } else {
@@ -134,7 +143,7 @@ export default function ParticipanteQRCode() {
           setMostraBotao("JÁ")
         } else {
           setStatusInscricao("NÃO inscrito");
-          setInputDisabled(false); // Desabilita a navegação para manutenção dos participantes
+          setInputDisabled(false); // Habilita a navegação para manutenção dos participantes
           setMostraBotao("NÃO")
         }
       } else {
@@ -160,14 +169,26 @@ export default function ParticipanteQRCode() {
         //  ATUALIZA PARTICIPANTE
         if (idParticipante) {
           // Atualizar participante existente
-          await fetch(`/api/participantes/${idParticipante}`, {
+          const response = await fetch(`/api/participantes/${idParticipante}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nome, fone: foneLimpo, email, mensagem: mensagemValor }),
-          });
+            body: JSON.stringify({ nome, matricula, empresa, setor, fone: foneLimpo, email, mensagem: mensagemValor }),
 
+          });
+          const result = await response.json();
+
+          if (!response.ok) {
+            setStatusInscricao(result.error || 'Erro ao processar a requisição');
+    
+              // Retornar a mensagem após 3 segundos
+              setTimeout(() => {
+                setStatusInscricao("NÃO inscrito");
+              }, 3000);
+              return;
+          }
+    
           // Inscrever na palestra
           inscreverParticipante(idParticipante,idPalestra) 
 
@@ -179,29 +200,23 @@ export default function ParticipanteQRCode() {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ nome, fone: foneLimpo, email, mensagem: mensagemValor }),
+            body: JSON.stringify({ nome, matricula, empresa, setor, fone: foneLimpo, email, mensagem: mensagemValor }),
           });
           const novoParticipante = await response.json();
-          setIdParticipante(novoParticipante.id);
-    
-          // Inscrever na palestra
-          inscreverParticipante(novoParticipante.idParticipante,idPalestra) 
-/*
-          const responsePresenca = await fetch('/api/adicionarPresenca', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              idPalestra: idPalestra,
-              idParticipante: novoParticipante.id,
-            }),
-          });
 
-          if (responsePresenca.ok) {
-            setStatusInscricao("Inscrição confirmada!");
+          if (!response.ok) {
+            setStatusInscricao(novoParticipante.error || 'Erro ao processar a requisição');
+    
+              // Retornar a mensagem após 3 segundos
+              setTimeout(() => {
+                setStatusInscricao("NÃO inscrito");
+              }, 3000);
+              return;
           }
-*/
+
+          // Inscrever na palestra
+          setIdParticipante(novoParticipante.id);
+          inscreverParticipante(novoParticipante.idParticipante,idPalestra) 
         }
       
       } catch (error) {
@@ -219,7 +234,7 @@ export default function ParticipanteQRCode() {
         console.error("Erro ao remover inscrição:", error);
       }
     }
-    setInputDisabled(true); // Habilita a Entrada do Participante se a palestra não ocorreu ainda
+    setInputDisabled(true); // Desabilita a Entrada do Participante se a palestra não ocorreu ainda
     setMostraBotao('')
 
   };
@@ -253,7 +268,7 @@ export default function ParticipanteQRCode() {
       >
         {/* C11: Cabeçalho */}
         <div className="flex flex-col items-center justify-center">
-          <Image src="/CIPA.PNG" alt="CIPA" width={100} height={100} />
+          <Image src="/CIPA.PNG" alt="CIPA" width={100} height={100}/>
           <h1 className="text-2xl font-bold text-center">CONTROLE DE PALESTRAS</h1>
         </div>
   
@@ -289,18 +304,52 @@ export default function ParticipanteQRCode() {
 
           {/* Labels e Inputs do Participante*/}
           <div className="flex items-center">
-            <label className="mr-2 text-sm">Celular:</label>
+            <label className="mr-2 text-sm">Matrícula:</label>
             <input
-              type="tel" required maxlength="11"
-              value={fone} 
-              onChange={(e) => setFone(e.target.value)} 
-              onFocus={handleFocus}
+              type="text"
+              value={matricula}
+              onChange={(e) => setMatricula(e.target.value)}
               onBlur={fetchParticipantes}
-              placeholder="Digite 11 números (DDDNÚMERO)"
-              disabled={isInputDisabled} 
-              className="border border-gray-800 p-0 pl-2 rounded w-80"
+              disabled={isInputDisabled}
+              className="border border-gray-800 p-0 pl-2 h-6 w-20 rounded flex-1"
             />
           </div>
+          
+          <div className="flex items-center">
+            <label className="mr-2 text-sm">Empresa:</label>
+            <select value={empresa} onChange={(e) => setEmpresa(e.target.value)} disabled={isInputDisabled} className="border border-gray-800 pl-1 p-0 h-6 rounded">
+              <option value="          ">          </option>
+              <option value="1">Alpek Polyester</option>
+              <option value="2">Ambipar</option>
+              <option value="3">Coating</option>
+              <option value="4">DM</option>
+              <option value="5">Gafor</option>
+              <option value="6">In Haus</option>
+              <option value="7">Manserv</option>
+              <option value="8">MPM</option>
+              <option value="9">Sapore</option>
+              <option value="10">Sesc</option>
+              <option value="11">Sigma</option>
+              <option value="12">Stahl</option>
+              <option value="13">Value</option>
+            </select>
+          </div>
+          
+          <div className="flex items-center">
+            <label className="mr-2 text-sm">Setor:</label>
+            <select value={setor} onChange={(e) => setSetor(e.target.value)} disabled={isInputDisabled} className="border border-gray-800 pl-1 p-0 h-6 rounded">
+              <option value="">          </option>
+              <option value="1">Comercial</option>
+              <option value="2">Laboratório</option>
+              <option value="3">Logística</option>
+              <option value="4">Produção PET</option>
+              <option value="5">Produção PTA</option>
+              <option value="6">Rh</option>
+              <option value="7">SMS</option>
+              <option value="8">Tributário</option>
+            </select>
+          </div>
+
           <div className="flex items-center">
             <label className="mr-2 text-sm">Nome:</label>
             <input
@@ -311,6 +360,20 @@ export default function ParticipanteQRCode() {
               className="border border-gray-800 p-0 h-6 flex-1 rounded"
             />
           </div>
+          
+          <div className="flex items-center">
+            <label className="mr-2 text-sm">Celular:</label>
+            <input
+              type="tel" required maxlength="11"
+              value={fone} 
+              onChange={(e) => setFone(e.target.value)} 
+              onFocus={handleFocus}
+              placeholder="Digite 11 números (DDDNÚMERO)"
+              disabled={isInputDisabled} 
+              className="border border-gray-800 p-0 pl-2 rounded w-80"
+            />
+          </div>
+          
           <div className="flex items-center">
             <label className="mr-2 text-sm">E-mail:</label>
             <input
@@ -322,6 +385,7 @@ export default function ParticipanteQRCode() {
               className="border border-gray-800 p-0 h-6 flex-1 rounded"
             />
           </div>
+          
           <div className="flex items-center">
             <label className="mr-2 text-sm">Deseja Receber Mensagem Por:</label>
             <select
