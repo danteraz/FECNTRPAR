@@ -37,7 +37,16 @@ export default function CadastroPalestras() {
 
       const res = await fetch('/api/palestras');
       const data = await res.json();
-      setPalestras(data);
+      //setPalestras(data);
+
+      // Formatando a data para DD/MM/YYYY
+      const formattedData = data.map(palestra => ({
+        ...palestra,
+        dataPalestra: new Date(palestra.dataPalestra).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) // Formato DD/MM/YYYY
+      }));
+
+      setPalestras(formattedData);
+
 
       // Selecionar a primeira linha automaticamente
       if (data.length > 0) {
@@ -163,7 +172,12 @@ export default function CadastroPalestras() {
   const fillInputs = async (id) => {
     const admin = palestras.find((admin) => admin.idPalestra === id);
     if (admin) {
-      const formattedDate = new Date(admin.dataPalestra).toISOString().split('T')[0];   
+      const dataHoraPalestra = admin.dataPalestra; // Use apenas a data completa vinda do banco
+      const dateParts = dataHoraPalestra.split('/'); // ['2024', '09', '23']
+      console.log("DATA PARTS",dateParts)
+      const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+      console.log("DATA FILINPUT",formattedDate)
+      //const formattedDate = new Date(admin.dataPalestra).toISOString().split('T')[0];   
       setIdCodigo(id)
       setDataPalestra(formattedDate);
       setHora(admin.hora);
@@ -354,7 +368,7 @@ export default function CadastroPalestras() {
               {displayedPalestras.map((palestra) => (
                 <tr key={palestra.idPalestra} onClick={() => !isEditing && setSelectedId(palestra.idPalestra)} className={selectedId === palestra.idPalestra ? 'bg-green-200' : ''}>
                   <td className="w-1/12 border border-gray-500 px-2 py-0 p-0 whitespace-nowrap text-left">{palestra.idPalestra}</td>
-                  <td className="w-2/12 border border-gray-500 px-2 py-0 p-0 whitespace-nowrap text-left">{new Date(palestra.dataPalestra).toLocaleDateString('pt-BR')}</td>
+                  <td className="w-2/12 border border-gray-500 px-2 py-0 p-0 whitespace-nowrap text-left">{palestra.dataPalestra}</td>
                   <td className="w-1/12 border border-gray-500 px-2 py-0 p-0 whitespace-nowrap text-left">{palestra.hora.slice(0, 5)}</td>
                   <td className="w-8/12 border border-gray-500 px-2 py-0 p-0 whitespace-nowrap text-left">{palestra.titulo}</td>
                 </tr>
