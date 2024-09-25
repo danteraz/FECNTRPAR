@@ -332,6 +332,7 @@ export default function ParticipanteQRCode() {
               <option value="11">Sigma</option>
               <option value="12">Stahl</option>
               <option value="13">Value</option>
+              <option value="14">Outro</option>
             </select>
           </div>
           
@@ -346,7 +347,9 @@ export default function ParticipanteQRCode() {
               <option value="5">Produção PTA</option>
               <option value="6">Rh</option>
               <option value="7">SMS</option>
-              <option value="8">Tributário</option>
+              <option value="8">TI</option>
+              <option value="9">Tributário</option>
+              <option value="10">Outro</option>
             </select>
           </div>
 
