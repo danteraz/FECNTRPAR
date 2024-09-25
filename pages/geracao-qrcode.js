@@ -49,10 +49,8 @@ export default function GeracaoQRCode() {
 
         // A dataPalestra já vem no formato ISO completo
         const dataHoraPalestra = DadosPalestra.dataPalestra; // Use apenas a data completa vinda do banco
-console.log("dataHoraPalestra",dataHoraPalestra);
         const dateParts = dataHoraPalestra.split('-'); // ['2024', '09', '23']
         const DtosPalestra = `${dateParts[0]}${dateParts[1]}${dateParts[2]}`; // 23/09/2024
-        console.log("DtosPalestra",DtosPalestra);
 
         const hoje = new Date(); 
         const ano = hoje.getFullYear();

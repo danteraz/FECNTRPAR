@@ -174,9 +174,7 @@ export default function CadastroPalestras() {
     if (admin) {
       const dataHoraPalestra = admin.dataPalestra; // Use apenas a data completa vinda do banco
       const dateParts = dataHoraPalestra.split('/'); // ['2024', '09', '23']
-      console.log("DATA PARTS",dateParts)
       const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-      console.log("DATA FILINPUT",formattedDate)
       //const formattedDate = new Date(admin.dataPalestra).toISOString().split('T')[0];   
       setIdCodigo(id)
       setDataPalestra(formattedDate);
@@ -201,7 +199,13 @@ export default function CadastroPalestras() {
   const refreshListbox = async () => {
     const res = await fetch('/api/palestras');
     const data = await res.json();
-    setPalestras(data);
+
+    const formattedData = data.map(palestra => ({
+      ...palestra,
+      dataPalestra: new Date(palestra.dataPalestra).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) // Formato DD/MM/YYYY
+    }));
+
+    setPalestras(formattedData);
   };
 
   const disableInputs = () => {
