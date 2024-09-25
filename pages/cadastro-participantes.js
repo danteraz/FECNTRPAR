@@ -9,6 +9,9 @@ export default function CadastroParticipantes() {
   //  Dados de Inputs
   const [participantes, setParticipantes] = useState([]);
   const [nome, setNome] = useState('');
+  const [matricula, setMatricula] = useState('');
+  const [empresa, setEmpresa] = useState('');
+  const [setor, setSetor] = useState('');
   const [fone, setFone] = useState('');
   const [email, setEmail] = useState('');
   const [mensagem, setMensagem] = useState('          ');
@@ -82,11 +85,11 @@ export default function CadastroParticipantes() {
     // Limpa o valor do telefone para garantir que apenas os números sejam enviados
     const foneLimpo = fone.replace(/\D/g, '');
 
-    //  Verifica se Já existe um participante com o fone
+    //  Verifica se Já existe um participante com a matrícula
     try {
       
       if (opcao === 'ALTERAÇÃO DE PARTICIPANTE' || opcao === 'INCLUSÃO DE PARTICIPANTE') {
-        let url = `/api/auth/check-fone-participante?fone=${foneLimpo}`;
+        let url = `/api/auth/check-fone-participante?matricula=${matricula}`;
         
         // Se for uma alteração, passamos também o idParticipante para ignorar ele mesmo na alteração de outro campo
         if (opcao === 'ALTERAÇÃO DE PARTICIPANTE') {
@@ -97,8 +100,8 @@ export default function CadastroParticipantes() {
         const result = await response.json();
     
         if (response.status === 400) {
-          // Já existe um participante com este fone
-          setOpcao(result.error || 'Já existe um participante com este fone!');
+          // Já existe um participante com esta matrícula
+          setOpcao(result.error || 'Já existe um participante com esta matrícula!');
           // Retornar a mensagem após 3 segundos
           setTimeout(() => {
             setOpcao(opcao);
@@ -120,7 +123,7 @@ export default function CadastroParticipantes() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ nome, fone: foneLimpo, email, mensagem: mensagemValor }),
+        body: JSON.stringify({ nome, matricula, empresa, setor, fone: foneLimpo, email, mensagem: mensagemValor }),
       });
       const result = await response.json();
 
@@ -141,7 +144,7 @@ export default function CadastroParticipantes() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ nome, fone: foneLimpo, email, mensagem: mensagemValor }),
+        body: JSON.stringify({ nome, matricula, empresa, setor, fone: foneLimpo, email, mensagem: mensagemValor }),
       });
       const result = await response.json();
 
@@ -191,10 +194,13 @@ export default function CadastroParticipantes() {
     const admin = participantes.find((admin) => admin.idParticipante === id);
     if (admin) {
       setNome(admin.nome);
+      setMatricula(admin.matricula);
+      setEmpresa(admin.empresa);
+      setSetor(admin.setor);
       setFone(formatPhoneNumber(admin.Fone));
       setEmail(admin.email);
 
-      // Inicializa o campo "mensagem" com o valor correspondente
+      // Inicializa o campo "mensagem" com o valor correspondente (Pelo campo mensagem ser int convert para text)
       const mensagemTexto = admin.mensagem === 1 ? '1' :
                             admin.mensagem === 2 ? '2' :
                             admin.mensagem === 3 ? '3' : '          ';
@@ -205,6 +211,9 @@ export default function CadastroParticipantes() {
 
   const resetInputs = () => {
     setNome('');
+    setMatricula('');
+    setEmpresa('');
+    setSetor('');
     setFone('');
     setEmail('');
     setMensagem('          ');
@@ -347,8 +356,42 @@ export default function CadastroParticipantes() {
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 disabled={isImpDisabled}
-                className="border border-gray-800 p-0 h-6 flex-1 rounded"
+                className="border border-gray-800 pl-2 p-0 h-6 flex-1 rounded"
               />
+            </div>
+
+            <div className="text-left">
+              <label className="mr-2 text-sm">Matrícula:</label>
+              <input type="text" value={matricula} onChange={(e) => setMatricula(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 p-0 pl-2 h-6 w-20 rounded flex-1" />
+              <label className="ml-4 mr-2 text-sm">Empresa:</label>
+              <select value={empresa} onChange={(e) => setEmpresa(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 pl-1 p-0 h-6 rounded">
+                <option value="          ">          </option>
+                <option value="1">Alpek Polyester</option>
+                <option value="2">Ambipar</option>
+                <option value="3">Coating</option>
+                <option value="4">DM</option>
+                <option value="5">Gafor</option>
+                <option value="6">In Haus</option>
+                <option value="7">Manserv</option>
+                <option value="8">MPM</option>
+                <option value="9">Sapore</option>
+                <option value="10">Sesc</option>
+                <option value="11">Sigma</option>
+                <option value="12">Stahl</option>
+                <option value="13">Value</option>
+              </select>
+              <label className="ml-4 mr-2 text-sm">Setor:</label>
+              <select value={setor} onChange={(e) => setSetor(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 pl-1 p-0 h-6 rounded">
+                <option value="">          </option>
+                <option value="1">Comercial</option>
+                <option value="2">Laboratório</option>
+                <option value="3">Logística</option>
+                <option value="4">Produção PET</option>
+                <option value="5">Produção PTA</option>
+                <option value="6">Rh</option>
+                <option value="7">SMS</option>
+                <option value="8">Tributário</option>
+              </select>
             </div>
             <div className="flex items-center">
               <label className="mr-2 text-sm">Celular:</label>
@@ -369,12 +412,12 @@ export default function CadastroParticipantes() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isImpDisabled}
-                className="border border-gray-800 p-0 h-6 flex-1 rounded"
+                className="border border-gray-800 pl-2 p-0 h-6 flex-1 rounded"
               />
             </div>
             <div className="flex items-center">
               <label className="mr-2 text-sm">Mensagem:</label>
-              <select value={mensagem} onChange={(e) => setMensagem(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 p-0 h-6 w-32 rounded">
+              <select value={mensagem} onChange={(e) => setMensagem(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 pl-2 p-0 h-6 w-32 rounded">
                 <option value="          ">          </option>
                 <option value="1">Fone</option>
                 <option value="2">E-mail</option>
