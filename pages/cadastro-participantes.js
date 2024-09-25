@@ -379,6 +379,7 @@ export default function CadastroParticipantes() {
                 <option value="11">Sigma</option>
                 <option value="12">Stahl</option>
                 <option value="13">Value</option>
+                <option value="14">Outro</option>
               </select>
               <label className="ml-4 mr-2 text-sm">Setor:</label>
               <select value={setor} onChange={(e) => setSetor(e.target.value)} disabled={isImpDisabled} className="border border-gray-800 pl-1 p-0 h-6 rounded">
@@ -390,7 +391,9 @@ export default function CadastroParticipantes() {
                 <option value="5">Produção PTA</option>
                 <option value="6">Rh</option>
                 <option value="7">SMS</option>
-                <option value="8">Tributário</option>
+                <option value="8">TI</option>
+                <option value="9">Tributário</option>
+                <option value="10">Outro</option>
               </select>
             </div>
             <div className="flex items-center">
